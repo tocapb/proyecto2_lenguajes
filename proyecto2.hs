@@ -14,6 +14,10 @@ inicio= do
     ruta <- getLine
     parqueos <- leerParqueos ruta
     print("Datos de parqueos cargados")
+    putStr("Introduzca la ruta del archivo para cargar las bicicletas:")
+    ruta <- getLine
+    bicicletas <- leerBicicletas ruta
+    print("Datos de bicicletas cargados")
     putStr("Introduzca la ruta del archivo para cargar los usuarios:")
     rutaUser <- getLine
     usuarios <- leerUsuarios rutaUser
@@ -22,13 +26,13 @@ inicio= do
     putStr("Introduzca el usuario:")
     usuario <- getLine
     case usuario of
-        "admin" -> menu_principal(-1,parqueos,usuarios)
+        "admin" -> menu_principal(-1,parqueos,bicicletas,usuarios)
         
     return()
 --Entradas:Una opcion de tipo entero y una lista de tipo Parqueo
 --Salidas:Ninguna
 --Funcionalidad:Menú principal para acceder a las opciones operativos o generales
-menu_principal(opcion, parqueos,usuarios)= do
+menu_principal(opcion, parqueos,bicicletas,usuarios)= do
     putStr("\nMenú Principal\n")
 
     putStr("1.Opciones Operativas\n")
@@ -39,14 +43,14 @@ menu_principal(opcion, parqueos,usuarios)= do
     let opcion = (read temporal :: Integer)
     case opcion of
         -1-> print("")
-        1 -> menu_operativo(-1,parqueos,usuarios)
-        2 -> menu_general(-1,parqueos,usuarios)
+        1 -> menu_operativo(-1,parqueos,bicicletas,usuarios)
+        2 -> menu_general(-1,parqueos,bicicletas,usuarios)
         3 -> return()
         
 --Entradas:Una opcion de tipo entero y una lista de tipo Parqueo
 --Salidas:Ninguna
 --Funcionalidad:Menú operativo para acceder a las funciones operativas
-menu_operativo(opcion, parqueos,usuarios)= do
+menu_operativo(opcion, parqueos,bicicletas,usuarios)= do
     putStr("\nMenú Operativo\n")
     putStr("1.Mostrar parqueos\n")
     putStr("2.Mostrar bicicletas \n")
@@ -58,17 +62,17 @@ menu_operativo(opcion, parqueos,usuarios)= do
     let opcion = (read temporal :: Integer)
     case opcion of
         -1 -> print("")
-        1 -> showParqueos parqueos usuarios
+        1 -> showParqueos parqueos bicicletas usuarios
         2 -> putStr("2")
-        3 -> showUsuarios usuarios parqueos
+        3 -> showUsuarios usuarios parqueos bicicletas
         4 -> putStr("4")
-        5 -> menu_principal(-1,parqueos,usuarios)
+        5 -> menu_principal(-1,parqueos,bicicletas,usuarios)
     return()
 
 --Entradas:Una opcion de tipo entero y una lista de tipo Parqueo
 --Salidas:Ninguna
 --Funcionalidad:Menú principal para acceder a las funciones generales   
-menu_general(opcion,parqueos,usuarios)= do
+menu_general(opcion,parqueos,bicicletas,usuarios)= do
     putStr("\nMenú Generales\n")
     putStr("1.Consultar bicicletas\n")
     putStr("2.Alquiler\n")
@@ -84,7 +88,7 @@ menu_general(opcion,parqueos,usuarios)= do
         2 -> putStr("2")
         3 -> putStr("3")
         4 -> putStr("4")
-        5 -> menu_principal(-1,parqueos,usuarios)
+        5 -> menu_principal(-1,parqueos,bicicletas,usuarios)
     return()
 
 --estructura para almacenar parqueos--------------------------------------------------
@@ -138,29 +142,29 @@ separaPorComas (cadena, temp) =
 --Entradas:Una lista de parqueos
 --Salidas:No tiene
 --Funcionalidad:se encarga pedir la provincia por buscar en los parqueos
-showParqueos :: [Parqueo]->[Usuario] -> IO()
-showParqueos lista usuarios = do
+showParqueos :: [Parqueo]->[Bicicleta]->[Usuario] -> IO()
+showParqueos listaparqueos listabicicletas listausuarios = do
     putStr("Introduzca la provincia: ")
     temporal <- getLine
-    showParqueosAux lista temporal
-    menu_operativo(-1,lista,usuarios)
+    showParqueosAux listaparqueos listabicicletas temporal
+    menu_operativo(-1,listaparqueos,listabicicletas,listausuarios)
 
 --Entradas:Una lista de parqueos y un string
 --Salidas:No tiene
 --Funcionalidad:se encarga de validar cuando se acaban los parqueos cargados
-showParqueosAux :: [Parqueo] -> String -> IO ()
-showParqueosAux [ ] prov = print("")
-showParqueosAux lista prov=
+showParqueosAux :: [Parqueo] ->[Bicicleta]-> String -> IO ()
+showParqueosAux [ ] listabicicletas prov = print("")
+showParqueosAux listaparqueos listabicicletas prov=
     
     do  
-            showParqueo (head lista) prov
-            showParqueosAux (tail lista) prov
+            showParqueo (head listaparqueos) listabicicletas prov
+            showParqueosAux (tail listaparqueos) listabicicletas prov
 
 --Entradas:Un parqueo y un string
 --Salidas:No tiene
 --Funcionalidad:se encarga de imprimir la informacion del parqueo
-showParqueo :: Parqueo -> String -> IO ()
-showParqueo parqueo prov=
+showParqueo :: Parqueo ->[Bicicleta]-> String -> IO ()
+showParqueo parqueo listabicicletas prov=
     let 
         nombre_parqueo = getNombre_parqueo(parqueo)
         direccion_parqueo = getDireccion_parqueo(parqueo)
@@ -169,7 +173,9 @@ showParqueo parqueo prov=
         y = getY_parqueo(parqueo)
     in
         if provincia == prov then
+            do
             print("nombre: " ++ nombre_parqueo ++ ", direccion: " ++ direccion_parqueo ++ ", provincia: " ++ provincia ++ ", x: " ++ show x ++ ", y: " ++ show y)
+            showBicicletasAux listabicicletas nombre_parqueo
         else
             return ()
 
@@ -203,12 +209,12 @@ separaElementosUsuario lista =
     else
         [creaUsuario(separaPorComas((head lista),""))] ++ separaElementosUsuario (tail lista)
 
-showUsuarios :: [Usuario]->[Parqueo] -> IO()
-showUsuarios lista parqueos = do
+showUsuarios :: [Usuario]->[Parqueo] ->[Bicicleta]-> IO()
+showUsuarios listausuarios listaparqueos listabicicletas= do
     putStr("Introduzca el número de cedula: ")
     temporal <- getLine
-    showUsuariosAux lista temporal
-    menu_operativo(-1,parqueos,lista)
+    showUsuariosAux listausuarios temporal
+    menu_operativo(-1,listaparqueos,listabicicletas,listausuarios)
 
 --Entradas:Una lista de usuarios y un string
 --Salidas:No tiene
@@ -253,5 +259,72 @@ showTodosUsuarios usuario =
     in
 
         print("Cedula: " ++ show cedula ++ ", Nombre del Usuario: " ++ nombre_usuario)
-        
+
+--estructura para almacenar bicicletas------------------------------------------------
+type Codigo_bicicleta = String
+type Tipo_bicicleta  = String
+type Ubicacion_bicicleta = String
+type Transito_bicicleta = String
+data Bicicleta = Bicicleta Codigo_bicicleta Tipo_bicicleta Ubicacion_bicicleta Transito_bicicleta;
+--------------------------------------------------------------------------------------
+
+-- Constructor de bicicletas---------------------------------------------------------------------------------------------------------------
+creaBicicleta(elemento) = Bicicleta (elemento!!0) (elemento!!1) (elemento!!2) (elemento!!3)
+getCodigo_bicicleta (Bicicleta codigo_bicicleta _ _ _) = codigo_bicicleta;
+getTipo_bicicleta (Bicicleta _ tipo_bicicleta _ _) = tipo_bicicleta;
+getUbicacion_bicicleta (Bicicleta _ _ ubicacion_bicicleta _) = ubicacion_bicicleta;
+getTransito_bicicleta (Bicicleta _ _ _ transito_bicicleta) = transito_bicicleta;
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+--Entradas:Una ruta de archivo
+--Salidas:Una lista de parqueos
+--Funcionalidad:Guarda el contenido del archivo
+leerBicicletas :: FilePath -> IO [Bicicleta]
+leerBicicletas archivo = do
+    contenido <- readFile archivo
+    let bicicletas = separaElementosBicicleta (lines contenido)
+    return bicicletas
+
+separaElementosBicicleta :: [[Char]]-> [Bicicleta]
+separaElementosBicicleta lista = 
+    if null(lista) then []
+    else
+        [creaBicicleta(separaPorComas((head lista),"") ++ ["inactivo"])] ++ separaElementosBicicleta (tail lista)
+
+showBicicletas :: [Bicicleta] ->[Parqueo]->[Usuario]-> IO()
+showBicicletas listabicicletas listaparqueos listausuarios = do
+    putStr("Introduzca el nombre del parqueo: ")
+    temporal <- getLine
+    showBicicletasAux listabicicletas temporal
+    menu_operativo(-1,listaparqueos,listabicicletas,listausuarios)
+
+showBicicletasAux :: [Bicicleta] -> String -> IO ()
+showBicicletasAux [ ] nombre = print("")
+showBicicletasAux lista nombre=
+    
+    do  
+            showBicicleta (head lista) nombre
+            showBicicletasAux (tail lista) nombre
+
+showBicicleta :: Bicicleta -> String -> IO ()
+showBicicleta bicicleta nombre=
+    let 
+        codigo_bicicleta = getCodigo_bicicleta(bicicleta)
+        tipo_bicicleta = getTipo_bicicleta(bicicleta)
+        ubicacion_bicicleta = getUbicacion_bicicleta(bicicleta)
+        transito_bicicleta = getTransito_bicicleta(bicicleta)
+    in
+        if transito_bicicleta == "activo" then
+            if nombre == "transito" then
+                print("codigo de bicicleta: " ++ codigo_bicicleta ++ ", tipo de bicicleta: " ++ tipo_bicicleta ++ ", ubicacion: " ++ ubicacion_bicicleta)
+            else 
+                return ()
+        else
+            if nombre == "#" then
+                print("codigo de bicicleta: " ++ codigo_bicicleta ++ ", tipo de bicicleta: " ++ tipo_bicicleta ++ ", ubicacion: " ++ ubicacion_bicicleta)
+            else
+                if nombre == ubicacion_bicicleta then
+                    print("codigo de bicicleta: " ++ codigo_bicicleta ++ ", tipo de bicicleta: " ++ tipo_bicicleta ++ ", ubicacion: " ++ ubicacion_bicicleta)
+                else
+                    return ()
             
