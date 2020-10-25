@@ -1,4 +1,4 @@
-carTowers,José María Castro,LI,1,1
+carTowers,Jose Maria Castro,LI,1,1
 parqueo municipal,25 metros oeste de la catedral,AL,3,4
 Cars,La Garita,AL,5,6
 Carritoschocones,Santa barbara,HE,3,3

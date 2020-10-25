@@ -84,7 +84,7 @@ menu_general(opcion,parqueos,bicicletas,usuarios)= do
     let opcion = (read temporal :: Integer)
     case opcion of
         -1 -> print("")
-        1 -> putStr("1")
+        1 -> consultaBicicletas parqueos bicicletas usuarios
         2 -> putStr("2")
         3 -> putStr("3")
         4 -> putStr("4")
@@ -327,4 +327,74 @@ showBicicleta bicicleta nombre=
                     print("codigo de bicicleta: " ++ codigo_bicicleta ++ ", tipo de bicicleta: " ++ tipo_bicicleta ++ ", ubicacion: " ++ ubicacion_bicicleta)
                 else
                     return ()
-            
+
+consultaBicicletas :: [Parqueo] -> [Bicicleta] -> [Usuario] -> IO()
+consultaBicicletas listaparqueos listabicicletas listausuarios = do
+    putStr("Introduzca su coordenada x: ")
+    x_str <- getLine
+    let x = (read x_str :: Integer)
+    putStr("Introduzca su coordenada y: ")
+    y_str <- getLine
+    let y = (read y_str :: Integer)
+    let nombre_parqueo = sacaBajo (consultaBicicletasAux listaparqueos x y)
+    imprimeParqueo listaparqueos listabicicletas nombre_parqueo
+    menu_general(-1,listaparqueos,listabicicletas,listausuarios)
+
+consultaBicicletasAux :: [Parqueo] -> Integer-> Integer->[(String,Integer)]
+consultaBicicletasAux [ ] x y = []
+consultaBicicletasAux listaparqueos x y =
+    let
+        elemento = calculaPitagoras (head listaparqueos) x y
+    in
+        [elemento] ++ consultaBicicletasAux (tail listaparqueos) x y
+
+calculaPitagoras :: Parqueo -> Integer -> Integer->(String,Integer)
+calculaPitagoras parqueo x_us y_us =
+    let 
+        nombre_parqueo = getNombre_parqueo(parqueo)
+        x = getX_parqueo(parqueo)
+        y = getY_parqueo(parqueo)
+        res = (x_us - x)^2 + (y_us - y)^2
+    in
+        (nombre_parqueo,res)
+
+sacaBajo :: [(String,Integer)]->String
+sacaBajo lista =
+    do  
+        sacaBajoAux (head lista) (tail lista)
+
+sacaBajoAux :: (String,Integer)->[(String,Integer)]->String
+sacaBajoAux (a,b) lista =
+    let 
+        (c,d) = (head lista)
+    in
+        if null(lista) then a
+        else
+            if b < d then
+                sacaBajoAux (a,b) (tail lista)
+            else
+                sacaBajoAux (c,d) (tail lista)
+
+imprimeParqueo :: [Parqueo]->[Bicicleta]->String->IO()
+imprimeParqueo [ ] listabicicletas nombre = print("")
+imprimeParqueo listaparqueos listabicicletas nombre=
+    
+    do  
+            imprimeParqueoAux (head listaparqueos) listabicicletas nombre
+            imprimeParqueo (tail listaparqueos) listabicicletas nombre
+
+imprimeParqueoAux :: Parqueo->[Bicicleta]->String->IO()
+imprimeParqueoAux parqueo listabicicletas nombre =
+    let 
+        nombre_parqueo = getNombre_parqueo(parqueo)
+        direccion_parqueo = getDireccion_parqueo(parqueo)
+        provincia = getProvincia(parqueo)
+        x = getX_parqueo(parqueo)
+        y = getY_parqueo(parqueo)
+    in
+        if nombre == nombre_parqueo then
+            do
+            print("nombre: " ++ nombre_parqueo ++ ", direccion: " ++ direccion_parqueo ++ ", provincia: " ++ provincia ++ ", x: " ++ show x ++ ", y: " ++ show y)
+            showBicicletasAux listabicicletas nombre_parqueo
+        else
+            return ()
