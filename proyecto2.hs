@@ -1,3 +1,4 @@
+import System.Exit (exitSuccess)
 -- datos de la empresa
 -- guardados como globales
 nombre_empresa = "Los cleteros"
@@ -25,14 +26,15 @@ inicio= do
     putStr("\nBienvenido\n")
     putStr("Introduzca el usuario:")
     usuario <- getLine
+    let alquileres=[]
     case usuario of
-        "admin" -> menu_principal(-1,parqueos,bicicletas,usuarios)
+        "admin" -> menu_principal(-1,parqueos,bicicletas,usuarios,alquileres)
         
     return()
 --Entradas:Una opcion de tipo entero y una lista de tipo Parqueo
 --Salidas:Ninguna
 --Funcionalidad:Menú principal para acceder a las opciones operativos o generales
-menu_principal(opcion, parqueos,bicicletas,usuarios)= do
+menu_principal(opcion, parqueos,bicicletas,usuarios, alquileres)= do
     putStr("\nMenú Principal\n")
 
     putStr("1.Opciones Operativas\n")
@@ -43,14 +45,14 @@ menu_principal(opcion, parqueos,bicicletas,usuarios)= do
     let opcion = (read temporal :: Integer)
     case opcion of
         -1-> print("")
-        1 -> menu_operativo(-1,parqueos,bicicletas,usuarios)
-        2 -> menu_general(-1,parqueos,bicicletas,usuarios)
+        1 -> menu_operativo(-1,parqueos,bicicletas,usuarios,alquileres)
+        2 -> menu_general(-1,parqueos,bicicletas,usuarios, alquileres)
         3 -> return()
         
 --Entradas:Una opcion de tipo entero y una lista de tipo Parqueo
 --Salidas:Ninguna
 --Funcionalidad:Menú operativo para acceder a las funciones operativas
-menu_operativo(opcion, parqueos,bicicletas,usuarios)= do
+menu_operativo(opcion, parqueos,bicicletas,usuarios,alquileres)= do
     putStr("\nMenú Operativo\n")
     putStr("1.Mostrar parqueos\n")
     putStr("2.Mostrar bicicletas \n")
@@ -62,17 +64,17 @@ menu_operativo(opcion, parqueos,bicicletas,usuarios)= do
     let opcion = (read temporal :: Integer)
     case opcion of
         -1 -> print("")
-        1 -> showParqueos parqueos bicicletas usuarios
-        2 -> putStr("2")
-        3 -> showUsuarios usuarios parqueos bicicletas
+        1 -> showParqueos parqueos bicicletas usuarios alquileres
+        2 -> showBicicletas bicicletas parqueos usuarios alquileres
+        3 -> showUsuarios usuarios parqueos bicicletas alquileres
         4 -> putStr("4")
-        5 -> menu_principal(-1,parqueos,bicicletas,usuarios)
+        5 -> menu_principal(-1,parqueos,bicicletas,usuarios, alquileres)
     return()
 
 --Entradas:Una opcion de tipo entero y una lista de tipo Parqueo
 --Salidas:Ninguna
 --Funcionalidad:Menú principal para acceder a las funciones generales   
-menu_general(opcion,parqueos,bicicletas,usuarios)= do
+menu_general(opcion,parqueos,bicicletas,usuarios,alquileres)= do
     putStr("\nMenú Generales\n")
     putStr("1.Consultar bicicletas\n")
     putStr("2.Alquiler\n")
@@ -84,11 +86,11 @@ menu_general(opcion,parqueos,bicicletas,usuarios)= do
     let opcion = (read temporal :: Integer)
     case opcion of
         -1 -> print("")
-        1 -> consultaBicicletas parqueos bicicletas usuarios
-        2 -> putStr("2")
+        1 -> consultaBicicletas parqueos bicicletas usuarios alquileres
+        2 -> alquilarBicicletas parqueos bicicletas usuarios alquileres
         3 -> putStr("3")
         4 -> putStr("4")
-        5 -> menu_principal(-1,parqueos,bicicletas,usuarios)
+        5 -> menu_principal(-1,parqueos,bicicletas,usuarios, alquileres)
     return()
 
 --estructura para almacenar parqueos--------------------------------------------------
@@ -142,12 +144,12 @@ separaPorComas (cadena, temp) =
 --Entradas:Una lista de parqueos
 --Salidas:No tiene
 --Funcionalidad:se encarga pedir la provincia por buscar en los parqueos
-showParqueos :: [Parqueo]->[Bicicleta]->[Usuario] -> IO()
-showParqueos listaparqueos listabicicletas listausuarios = do
+showParqueos :: [Parqueo]->[Bicicleta]->[Usuario]->[Alquiler]-> IO()
+showParqueos listaparqueos listabicicletas listausuarios listaalquileres = do
     putStr("Introduzca la provincia: ")
     temporal <- getLine
     showParqueosAux listaparqueos listabicicletas temporal
-    menu_operativo(-1,listaparqueos,listabicicletas,listausuarios)
+    menu_operativo(-1,listaparqueos,listabicicletas,listausuarios, listaalquileres)
 
 --Entradas:Una lista de parqueos y un string
 --Salidas:No tiene
@@ -207,21 +209,21 @@ separaElementosUsuario :: [[Char]]-> [Usuario]
 separaElementosUsuario lista = 
     if null(lista) then []
     else
-        [creaUsuario(separaPorComas((head lista),""))] ++ separaElementosUsuario (tail lista)
+        [creaUsuario(separaPorComasUsuarios((head lista),""))] ++ separaElementosUsuario (tail lista)
 
-showUsuarios :: [Usuario]->[Parqueo] ->[Bicicleta]-> IO()
-showUsuarios listausuarios listaparqueos listabicicletas= do
+showUsuarios :: [Usuario]->[Parqueo] ->[Bicicleta]-> [Alquiler]-> IO()
+showUsuarios listausuarios listaparqueos listabicicletas listaalquileres= do
     putStr("Introduzca el número de cedula: ")
     temporal <- getLine
-    showUsuariosAux listausuarios temporal
-    menu_operativo(-1,listaparqueos,listabicicletas,listausuarios)
+    showUsuariosAux listausuarios temporal listaalquileres
+    menu_operativo(-1,listaparqueos,listabicicletas,listausuarios, listaalquileres)
 
 --Entradas:Una lista de usuarios y un string
 --Salidas:No tiene
 --Funcionalidad:se encarga de validar cuando se acaban los usuarios cargados
-showUsuariosAux :: [Usuario] -> String -> IO ()
-showUsuariosAux [ ] cedul = print("")
-showUsuariosAux lista cedul=
+showUsuariosAux :: [Usuario] -> String-> [Alquiler] -> IO ()
+showUsuariosAux [ ] cedul listaalquileres = print("")
+showUsuariosAux lista cedul listaalquileres=
     
     do  
         let cedul_int=(read (cedul) :: Integer)
@@ -229,23 +231,25 @@ showUsuariosAux lista cedul=
         if "#" == cedul then
             do
             showTodosUsuarios (head lista) 
-            showUsuariosAux (tail lista) cedul
+            showUsuariosAux (tail lista) cedul listaalquileres
         else 
             do   
-            showUsuario (head lista) cedul_int
-            showUsuariosAux (tail lista) cedul
+            showUsuario (head lista) cedul_int listaalquileres
+            showUsuariosAux (tail lista) cedul listaalquileres
 
 --Entradas:Un usuarios y un string
 --Salidas:No tiene
 --Funcionalidad:se encarga de imprimir la informacion de los usuarios
-showUsuario :: Usuario -> Integer -> IO ()
-showUsuario usuario cedul=
+showUsuario :: Usuario -> Integer->[Alquiler] -> IO ()
+showUsuario usuario cedul listaalquileres=
     let 
         cedula = getCedula(usuario)
         nombre_usuario = getNombre_usuario(usuario)
     in
-        if cedula == cedul then
-            print("Cedula: " ++ show cedula ++ ", Nombre del Usuario: " ++ nombre_usuario)
+        if cedula == cedul then 
+            do
+                print("Cedula: " ++ show cedula ++ ", Nombre del Usuario: " ++ nombre_usuario)
+                showAlquileresUsuarioAux listaalquileres cedul
         else
             return ()
 --Entradas:Un usuarios
@@ -260,20 +264,52 @@ showTodosUsuarios usuario =
 
         print("Cedula: " ++ show cedula ++ ", Nombre del Usuario: " ++ nombre_usuario)
 
+
+showAlquileresUsuarioAux :: [Alquiler]->Integer->IO ()
+showAlquileresUsuarioAux [ ] cedul = print("")
+showAlquileresUsuarioAux lista cedul =
+    do
+        showAlquileresUsuario (head lista) cedul
+        showAlquileresUsuarioAux (tail lista) cedul
+
+showAlquileresUsuario :: Alquiler -> Integer -> IO ()
+showAlquileresUsuario alquiler cedul=
+    let 
+        cedula= getUsuario_cedula(alquiler)
+        id_cleta = getId_bicicleta(alquiler)
+        id_alqui = getId_alquiler(alquiler)
+        estado = getEstado_alquiler(alquiler)
+        salida= getSalida_alquiler(alquiler)
+        llegada= getDestino_alquiler(alquiler)
+    in
+        if cedula == cedul then 
+            do
+                print("Alquiler= " ++ " Cleta: " ++ id_cleta ++", Alqui: " ++ show id_alqui++ ", Estado: "++ estado ++", Salida: "++ salida++", Destino: "++ llegada)
+
+        else
+            return ()        
+
+separaPorComasUsuarios :: ([Char],[Char])->[[Char]]
+separaPorComasUsuarios (cadena, temp) =
+    if cadena == "" then [temp]
+    else
+        if (head cadena) == (head ",") then
+                [temp] ++ separaPorComas ((tail cadena), "")
+        else
+            separaPorComas ((tail cadena), temp++[(head cadena)])
 --estructura para almacenar bicicletas------------------------------------------------
 type Codigo_bicicleta = String
 type Tipo_bicicleta  = String
 type Ubicacion_bicicleta = String
-type Transito_bicicleta = String
-data Bicicleta = Bicicleta Codigo_bicicleta Tipo_bicicleta Ubicacion_bicicleta Transito_bicicleta;
+data Bicicleta = Bicicleta Codigo_bicicleta Tipo_bicicleta Ubicacion_bicicleta;
 --------------------------------------------------------------------------------------
 
 -- Constructor de bicicletas---------------------------------------------------------------------------------------------------------------
-creaBicicleta(elemento) = Bicicleta (elemento!!0) (elemento!!1) (elemento!!2) (elemento!!3)
-getCodigo_bicicleta (Bicicleta codigo_bicicleta _ _ _) = codigo_bicicleta;
-getTipo_bicicleta (Bicicleta _ tipo_bicicleta _ _) = tipo_bicicleta;
-getUbicacion_bicicleta (Bicicleta _ _ ubicacion_bicicleta _) = ubicacion_bicicleta;
-getTransito_bicicleta (Bicicleta _ _ _ transito_bicicleta) = transito_bicicleta;
+creaBicicleta(elemento) = Bicicleta (elemento!!0) (elemento!!1) (elemento!!2)
+getCodigo_bicicleta (Bicicleta codigo_bicicleta _ _ ) = codigo_bicicleta;
+getTipo_bicicleta (Bicicleta _ tipo_bicicleta _ ) = tipo_bicicleta;
+getUbicacion_bicicleta (Bicicleta _ _ ubicacion_bicicleta ) = ubicacion_bicicleta;
+
 -----------------------------------------------------------------------------------------------------------------------------------------
 
 --Entradas:Una ruta de archivo
@@ -289,14 +325,14 @@ separaElementosBicicleta :: [[Char]]-> [Bicicleta]
 separaElementosBicicleta lista = 
     if null(lista) then []
     else
-        [creaBicicleta(separaPorComas((head lista),"") ++ ["inactivo"])] ++ separaElementosBicicleta (tail lista)
+        [creaBicicleta(separaPorComas((head lista),""))] ++ separaElementosBicicleta (tail lista)
 
-showBicicletas :: [Bicicleta] ->[Parqueo]->[Usuario]-> IO()
-showBicicletas listabicicletas listaparqueos listausuarios = do
+showBicicletas :: [Bicicleta] ->[Parqueo]->[Usuario]->[Alquiler]-> IO()
+showBicicletas listabicicletas listaparqueos listausuarios listaalquileres = do
     putStr("Introduzca el nombre del parqueo: ")
     temporal <- getLine
     showBicicletasAux listabicicletas temporal
-    menu_operativo(-1,listaparqueos,listabicicletas,listausuarios)
+    menu_operativo(-1,listaparqueos,listabicicletas,listausuarios, listaalquileres)
 
 showBicicletasAux :: [Bicicleta] -> String -> IO ()
 showBicicletasAux [ ] nombre = print("")
@@ -312,9 +348,9 @@ showBicicleta bicicleta nombre=
         codigo_bicicleta = getCodigo_bicicleta(bicicleta)
         tipo_bicicleta = getTipo_bicicleta(bicicleta)
         ubicacion_bicicleta = getUbicacion_bicicleta(bicicleta)
-        transito_bicicleta = getTransito_bicicleta(bicicleta)
+  
     in
-        if transito_bicicleta == "activo" then
+        if ubicacion_bicicleta == "transito" then
             if nombre == "transito" then
                 print("codigo de bicicleta: " ++ codigo_bicicleta ++ ", tipo de bicicleta: " ++ tipo_bicicleta ++ ", ubicacion: " ++ ubicacion_bicicleta)
             else 
@@ -328,8 +364,8 @@ showBicicleta bicicleta nombre=
                 else
                     return ()
 
-consultaBicicletas :: [Parqueo] -> [Bicicleta] -> [Usuario] -> IO()
-consultaBicicletas listaparqueos listabicicletas listausuarios = do
+consultaBicicletas :: [Parqueo] -> [Bicicleta] -> [Usuario]->[Alquiler] -> IO()
+consultaBicicletas listaparqueos listabicicletas listausuarios listaalquileres = do
     putStr("Introduzca su coordenada x: ")
     x_str <- getLine
     let x = (read x_str :: Integer)
@@ -338,7 +374,19 @@ consultaBicicletas listaparqueos listabicicletas listausuarios = do
     let y = (read y_str :: Integer)
     let nombre_parqueo = sacaBajo (consultaBicicletasAux listaparqueos x y)
     imprimeParqueo listaparqueos listabicicletas nombre_parqueo
-    menu_general(-1,listaparqueos,listabicicletas,listausuarios)
+    menu_general(-1,listaparqueos,listabicicletas,listausuarios, listaalquileres)
+
+consultaBicicletasAlquiler :: [Parqueo] -> [Bicicleta] -> [Usuario] -> IO()
+consultaBicicletasAlquiler listaparqueos listabicicletas listausuarios = do
+    putStr("Introduzca su coordenada x: ")
+    x_str <- getLine
+    let x = (read x_str :: Integer)
+    putStr("Introduzca su coordenada y: ")
+    y_str <- getLine
+    let y = (read y_str :: Integer)
+    let nombre_parqueo = sacaBajo (consultaBicicletasAux listaparqueos x y)
+    imprimeParqueo listaparqueos listabicicletas nombre_parqueo
+    
 
 consultaBicicletasAux :: [Parqueo] -> Integer-> Integer->[(String,Integer)]
 consultaBicicletasAux [ ] x y = []
@@ -398,3 +446,203 @@ imprimeParqueoAux parqueo listabicicletas nombre =
             showBicicletasAux listabicicletas nombre_parqueo
         else
             return ()
+
+
+---------------------------------------------Alquiler--------------------------------------------------------------
+--estructura para almacenar alquileres------------------------------------------------
+type Usuario_cedula = Integer
+type Id_bicicleta  = String
+type Id_alquiler= Integer
+type Estado_alquiler= String
+type Destino_alquiler= String
+type Salida_Alquiler = String
+data Alquiler = Alquiler Usuario_cedula Id_bicicleta Id_alquiler Estado_alquiler Destino_alquiler Salida_Alquiler;
+--------------------------------------------------------------------------------------
+
+-- Constructor de Alquiler--------------------------------------------------------------------------------------------------------------
+creaAlquiler(elemento) = Alquiler (read (elemento!!0) :: Integer) (elemento!!1) (read (elemento!!2) :: Integer) (elemento!!3) (elemento!!4) (elemento!!5)
+getUsuario_cedula (Alquiler usuario_cedula _ _ _ _ _ ) = usuario_cedula;
+getId_bicicleta (Alquiler _ id_bicicleta _ _ _ _ ) = id_bicicleta;
+getId_alquiler (Alquiler _ _ id_alquiler _ _ _ ) = id_alquiler;
+getEstado_alquiler (Alquiler _ _ _ estado_alquiler _ _ ) = estado_alquiler;
+getDestino_alquiler (Alquiler _ _ _ _ destino_alquiler _) = destino_alquiler;
+getSalida_alquiler (Alquiler _ _ _ _ _ salida_alquiler) = salida_alquiler;
+-------------------------------------------------------------------------------------------------------------------------------------------
+
+alquilarBicicletas :: [Parqueo] -> [Bicicleta] -> [Usuario]-> [Alquiler]-> IO()
+alquilarBicicletas listaparqueos listabicicletas listausuarios listaalquileres = do
+    putStr("Introduzca su Cedula: ")
+    cedula_str <- getLine
+    let validando = validarCedulaAux listausuarios cedula_str
+    
+    if validando == Nothing then
+        do
+            putStr("Usuario Inválido")
+            menu_general(-1,listaparqueos,listabicicletas,listausuarios, listaalquileres)    
+    else 
+        do
+            putStr("Introduzca su punto de salida\n")
+            consultaBicicletasAlquiler listaparqueos listabicicletas listausuarios
+            putStr("Introduzca el parqueo de llegada\n")
+            parqueo <- getLine
+            let validando = validarParqueoAux listaparqueos parqueo
+            if validando == Nothing then 
+                do
+                    putStr("Parqueo Inválido\n")
+            else
+                do 
+                    putStr("Introduzca código de la bicicleta\n")
+                    codigo_bici <- getLine
+                    let validando = validarCodigoAux listabicicletas codigo_bici
+                    if validando== " " || validando == parqueo then
+                        do 
+                            putStr("Código Inválido o Parqueo de salida igual al se llegada\n")
+                            
+                    else
+                        do 
+                            
+                            let listaalquileresA= crearAlquiler listaalquileres cedula_str codigo_bici parqueo validando
+                            let listabicicletasA=modificarCodigoAux listabicicletas codigo_bici 
+
+                            putStr("Procesando Alquiler...\n")
+                            menu_general(-1,listaparqueos,listabicicletasA,listausuarios, listaalquileresA)
+                            
+                    
+                    
+
+
+    menu_general(-1,listaparqueos,listabicicletas,listausuarios, listaalquileres)
+
+validarCedulaAux :: [Usuario] -> String -> Maybe Int
+validarCedulaAux lista cedul=
+    
+    do  
+        let cedul_int=(read (cedul) :: Integer)
+            bandera=1
+               
+        
+        if null(lista) then 
+            Nothing
+        else
+            if validarCedula (head lista) cedul_int == Nothing then
+                validarCedulaAux (tail lista) cedul
+            else
+                Just bandera
+
+validarCedula :: Usuario -> Integer -> Maybe Int
+validarCedula usuario cedul=
+    let 
+        cedula = getCedula(usuario)
+        bandera=1
+    in
+        if cedula == cedul then
+            Just bandera
+        else
+            Nothing
+
+
+validarParqueoAux :: [Parqueo] -> String -> Maybe Int
+validarParqueoAux lista parqueito=
+    
+    do  
+        let bandera=1
+               
+        
+        if null(lista) then 
+            Nothing
+        else
+            if validarParqueo (head lista) parqueito == Nothing then
+                validarParqueoAux (tail lista) parqueito
+            else
+                Just bandera
+
+validarParqueo :: Parqueo -> String -> Maybe Int
+validarParqueo parqueo parqueito=
+    let 
+        nombre_parqueito = getNombre_parqueo(parqueo)
+        bandera=1
+    in
+        if nombre_parqueito == parqueito then
+            Just bandera
+        else
+            Nothing
+
+validarCodigoAux :: [Bicicleta] -> String -> [Char]
+validarCodigoAux lista bici=
+    
+    do  
+        let bandera= validarCodigo (head lista) bici
+               
+        
+        if null(lista) then 
+            " "
+        else
+            if validarCodigo (head lista) bici == " " then
+                validarCodigoAux (tail lista) bici
+            else
+                bandera
+
+validarCodigo :: Bicicleta -> String -> [Char]
+validarCodigo bicicleta bici=
+    let 
+        cod_bici = getCodigo_bicicleta(bicicleta)
+        ubi_bici = getUbicacion_bicicleta(bicicleta)
+        
+        
+    in
+        if cod_bici == bici && ubi_bici/= "transito" then 
+            ubi_bici
+        else
+            " "
+
+modificarCodigoAux :: [Bicicleta] -> String -> [Bicicleta]
+modificarCodigoAux lista bici=
+    
+    do  
+        if null(lista) then 
+            []
+        else
+            let 
+                cod_bici = getCodigo_bicicleta(head lista)
+                tip_bici = getTipo_bicicleta(head lista)
+                ubi_bici= "transito"
+            in
+                if cod_bici == bici then 
+                    [creaBicicleta([cod_bici,tip_bici,ubi_bici])] ++ (tail lista)
+                else
+                    [head lista] ++ modificarCodigoAux (tail lista) bici
+
+
+crearAlquiler ::[Alquiler] -> String -> String -> String ->String -> [Alquiler]
+crearAlquiler lista usuario id_bici desti_alqui salid_alqui= 
+    if null(lista) then 
+        [creaAlquiler([usuario,id_bici,"1","activo",desti_alqui, salid_alqui])]
+    else
+        do
+            let id_alquiler=getId_alquiler(last(lista))+1
+            [last(lista)] ++  [creaAlquiler([usuario,id_bici,show id_alquiler,"activo",desti_alqui,salid_alqui])]
+
+---- PARA VER QUE TIENE LA ESTRUCTURA ALQUILERES
+showAlquileresAux :: [Alquiler] -> IO ()
+showAlquileresAux [ ] = print("")
+showAlquileresAux lista=
+    
+    do  
+        showTodosAlquiler (head lista)
+        showAlquileresAux (tail lista)
+
+--Entradas:Un usuarios y un string
+--Salidas:No tiene
+--Funcionalidad:se encarga de imprimir la informacion de los usuarios
+showTodosAlquiler :: Alquiler -> IO ()
+showTodosAlquiler usuario =
+    let 
+        usuarios = getUsuario_cedula(usuario)
+        id_cleta = getId_bicicleta(usuario)
+        id_alqui = getId_alquiler(usuario)
+        estado = getEstado_alquiler(usuario)
+        salida= getSalida_alquiler(usuario)
+        llegada= getDestino_alquiler(usuario)
+    in
+
+        print("Cedula: " ++ show usuarios ++ ", Cleta: " ++ id_cleta ++", Alqui: " ++ show id_alqui++ ", Estado: "++ estado ++", Salida: "++ salida++", Destino: "++ llegada )
