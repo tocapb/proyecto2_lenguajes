@@ -6,6 +6,7 @@ B001,TR,parqueo municipal
 B002,AE,parqueo municipal
 B003,TR,parqueo municipal
 B004,TR,parqueo municipal
+B005,AE,Sportcars
 C001,TR,Cars
 C002,TR,Cars
 C003,TR,Cars
@@ -18,3 +19,4 @@ E001,TR,Carrines
 E002,TR,Carrines
 E003,TR,Carrines
 E004,AE,Carrines
+H004,AE,Carrones

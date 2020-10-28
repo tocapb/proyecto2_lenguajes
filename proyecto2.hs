@@ -17,7 +17,8 @@ inicio= do
     print("Datos de parqueos cargados")
     putStr("Introduzca la ruta del archivo para cargar las bicicletas:")
     ruta <- getLine
-    bicicletas <- leerBicicletas ruta
+    bicicleticas <- leerBicicletas ruta
+    let bicicletas = verificaParqueos bicicleticas parqueos
     print("Datos de bicicletas cargados")
     putStr("Introduzca la ruta del archivo para cargar los usuarios:")
     rutaUser <- getLine
@@ -326,6 +327,29 @@ separaElementosBicicleta lista =
     if null(lista) then []
     else
         [creaBicicleta(separaPorComas((head lista),""))] ++ separaElementosBicicleta (tail lista)
+
+verificaParqueos :: [Bicicleta]->[Parqueo]->[Bicicleta]
+verificaParqueos listabicicletas listaparqueos =
+    let
+        ubicacion_bicicleta = getUbicacion_bicicleta(head listabicicletas)
+    in
+        if null(listabicicletas) then []
+        else
+            if verificaParqueosAux listaparqueos ubicacion_bicicleta == 1 then 
+                [head listabicicletas] ++ verificaParqueos (tail listabicicletas) listaparqueos
+            else
+                verificaParqueos (tail listabicicletas) listaparqueos
+
+verificaParqueosAux :: [Parqueo]->String->Integer
+verificaParqueosAux [ ] ubicacion = 2
+verificaParqueosAux listaparqueos ubicacion = 
+    let
+        nombre_parqueo = getNombre_parqueo(head listaparqueos)
+    in
+        if nombre_parqueo == ubicacion then
+            1
+        else
+            verificaParqueosAux (tail listaparqueos) ubicacion
 
 showBicicletas :: [Bicicleta] ->[Parqueo]->[Usuario]->[Alquiler]-> IO()
 showBicicletas listabicicletas listaparqueos listausuarios listaalquileres = do
