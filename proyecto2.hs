@@ -282,6 +282,7 @@ showAlquileresUsuario alquiler cedul=
         estado = getEstado_alquiler(alquiler)
         salida= getSalida_alquiler(alquiler)
         llegada= getDestino_alquiler(alquiler)
+        tipo = getTipo_bici(alquiler)
     in
         if cedula == cedul then 
             do
@@ -480,17 +481,19 @@ type Id_alquiler= Integer
 type Estado_alquiler= String
 type Destino_alquiler= String
 type Salida_Alquiler = String
-data Alquiler = Alquiler Usuario_cedula Id_bicicleta Id_alquiler Estado_alquiler Destino_alquiler Salida_Alquiler;
+type Tipo_bici = String
+data Alquiler = Alquiler Usuario_cedula Id_bicicleta Id_alquiler Estado_alquiler Destino_alquiler Salida_Alquiler Tipo_bici;
 --------------------------------------------------------------------------------------
 
 -- Constructor de Alquiler--------------------------------------------------------------------------------------------------------------
-creaAlquiler(elemento) = Alquiler (read (elemento!!0) :: Integer) (elemento!!1) (read (elemento!!2) :: Integer) (elemento!!3) (elemento!!4) (elemento!!5)
-getUsuario_cedula (Alquiler usuario_cedula _ _ _ _ _ ) = usuario_cedula;
-getId_bicicleta (Alquiler _ id_bicicleta _ _ _ _ ) = id_bicicleta;
-getId_alquiler (Alquiler _ _ id_alquiler _ _ _ ) = id_alquiler;
-getEstado_alquiler (Alquiler _ _ _ estado_alquiler _ _ ) = estado_alquiler;
-getDestino_alquiler (Alquiler _ _ _ _ destino_alquiler _) = destino_alquiler;
-getSalida_alquiler (Alquiler _ _ _ _ _ salida_alquiler) = salida_alquiler;
+creaAlquiler(elemento) = Alquiler (read (elemento!!0) :: Integer) (elemento!!1) (read (elemento!!2) :: Integer) (elemento!!3) (elemento!!4) (elemento!!5) (elemento!!6)
+getUsuario_cedula (Alquiler usuario_cedula _ _ _ _ _ _ ) = usuario_cedula;
+getId_bicicleta (Alquiler _ id_bicicleta _ _ _ _ _) = id_bicicleta;
+getId_alquiler (Alquiler _ _ id_alquiler _ _ _ _) = id_alquiler;
+getEstado_alquiler (Alquiler _ _ _ estado_alquiler _ _ _ ) = estado_alquiler;
+getDestino_alquiler (Alquiler _ _ _ _ destino_alquiler _ _) = destino_alquiler;
+getSalida_alquiler (Alquiler _ _ _ _ _ salida_alquiler _) = salida_alquiler;
+getTipo_bici (Alquiler _ _ _ _ _ _ tipo_bici) = tipo_bici;
 -------------------------------------------------------------------------------------------------------------------------------------------
 
 alquilarBicicletas :: [Parqueo] -> [Bicicleta] -> [Usuario]-> [Alquiler]-> IO()
@@ -518,14 +521,14 @@ alquilarBicicletas listaparqueos listabicicletas listausuarios listaalquileres =
                     putStr("Introduzca código de la bicicleta\n")
                     codigo_bici <- getLine
                     let validando = validarCodigoAux listabicicletas codigo_bici
-                    if validando== " " || validando == parqueo then
+                    if (head validando)== " " || (head validando) == parqueo then
                         do 
                             putStr("Código Inválido o Parqueo de salida igual al se llegada\n")
                             
                     else
                         do 
                             
-                            let listaalquileresA= crearAlquiler listaalquileres cedula_str codigo_bici parqueo validando
+                            let listaalquileresA= crearAlquiler listaalquileres cedula_str codigo_bici parqueo (head validando) (last(validando))
                             let listabicicletasA=modificarCodigoAux listabicicletas codigo_bici 
 
                             putStr("Procesando Alquiler...\n")
@@ -591,7 +594,7 @@ validarParqueo parqueo parqueito=
         else
             Nothing
 
-validarCodigoAux :: [Bicicleta] -> String -> [Char]
+validarCodigoAux :: [Bicicleta] -> String -> [String]
 validarCodigoAux lista bici=
     
     do  
@@ -599,25 +602,25 @@ validarCodigoAux lista bici=
                
         
         if null(lista) then 
-            " "
+            [" "]
         else
-            if validarCodigo (head lista) bici == " " then
+            if validarCodigo (head lista) bici == [" "] then
                 validarCodigoAux (tail lista) bici
             else
                 bandera
 
-validarCodigo :: Bicicleta -> String -> [Char]
+validarCodigo :: Bicicleta -> String -> [String]
 validarCodigo bicicleta bici=
     let 
         cod_bici = getCodigo_bicicleta(bicicleta)
         ubi_bici = getUbicacion_bicicleta(bicicleta)
-        
+        tipo_bici = getTipo_bicicleta(bicicleta)
         
     in
         if cod_bici == bici && ubi_bici/= "transito" then 
-            ubi_bici
+            [ubi_bici,tipo_bici]
         else
-            " "
+            [" "]
 
 modificarCodigoAux :: [Bicicleta] -> String -> [Bicicleta]
 modificarCodigoAux lista bici=
@@ -637,14 +640,14 @@ modificarCodigoAux lista bici=
                     [head lista] ++ modificarCodigoAux (tail lista) bici
 
 
-crearAlquiler ::[Alquiler] -> String -> String -> String ->String -> [Alquiler]
-crearAlquiler lista usuario id_bici desti_alqui salid_alqui= 
+crearAlquiler ::[Alquiler] -> String -> String -> String ->String -> String->[Alquiler]
+crearAlquiler lista usuario id_bici desti_alqui salid_alqui tipo_bici= 
     if null(lista) then 
-        [creaAlquiler([usuario,id_bici,"1","activo",desti_alqui, salid_alqui])]
+        [creaAlquiler([usuario,id_bici,"1","activo",desti_alqui, salid_alqui, tipo_bici])]
     else
         do
             let id_alquiler=getId_alquiler(last(lista))+1
-            [last(lista)] ++  [creaAlquiler([usuario,id_bici,show id_alquiler,"activo",desti_alqui,salid_alqui])]
+            [last(lista)] ++  [creaAlquiler([usuario,id_bici,show id_alquiler,"activo",desti_alqui,salid_alqui,tipo_bici])]
 
 ---- PARA VER QUE TIENE LA ESTRUCTURA ALQUILERES
 showAlquileresAux :: [Alquiler] -> IO ()
