@@ -1,3 +1,4 @@
+import Data.List
 import System.Exit (exitSuccess)
 -- datos de la empresa
 -- guardados como globales
@@ -49,7 +50,7 @@ menu_principal(opcion, parqueos,bicicletas,usuarios, alquileres, facturas)= do
         -1-> print("")
         1 -> menu_operativo(-1,parqueos,bicicletas,usuarios,alquileres,facturas)
         2 -> menu_general(-1,parqueos,bicicletas,usuarios, alquileres, facturas)
-        3 -> return()
+        3 -> exitSuccess
         
 --Entradas:Una opcion de tipo entero y una lista de tipo Parqueo
 --Salidas:Ninguna
@@ -69,7 +70,7 @@ menu_operativo(opcion, parqueos,bicicletas,usuarios,alquileres, facturas)= do
         1 -> showParqueos parqueos bicicletas usuarios alquileres facturas
         2 -> showBicicletas bicicletas parqueos usuarios alquileres facturas
         3 -> showUsuarios usuarios parqueos bicicletas alquileres facturas
-        4 -> putStr("4")
+        4 -> menu_estadisticas (-1,parqueos,bicicletas,usuarios,alquileres,facturas)
         5 -> menu_principal(-1,parqueos,bicicletas,usuarios, alquileres, facturas)
     return()
 
@@ -79,7 +80,7 @@ menu_operativo(opcion, parqueos,bicicletas,usuarios,alquileres, facturas)= do
 menu_general(opcion,parqueos,bicicletas,usuarios,alquileres, facturas)= do
     putStr("\nMenú Generales\n")
     putStr("1.Consultar bicicletas\n")
-    putStr("2.Alquiler\n")
+    putStr("2.Alquilar\n")
     putStr("3.Facturar \n")
     putStr("4.Consulta de factura \n")
     putStr("5.Volver \n")
@@ -95,6 +96,24 @@ menu_general(opcion,parqueos,bicicletas,usuarios,alquileres, facturas)= do
         5 -> menu_principal(-1,parqueos,bicicletas,usuarios, alquileres, facturas)
     return()
 
+menu_estadisticas(opcion,parqueos,bicicletas,usuarios,alquileres,facturas)= do
+    putStr("\nEstadisticas\n")
+    putStr("1.Top 5 usuarios con más viajes\n")
+    putStr("2.Top 5 parqueos con más viajes \n")
+    putStr("3.Top 3 de bicicletas con más kilometros recorridos \n")
+    putStr("4.Resumen \n")
+    putStr("5.Volver \n")
+    putStr("Introduzca su opción:")
+    temporal <- getLine
+    let opcion = (read temporal :: Integer)
+    case opcion of
+        -1 -> print("")
+        1 -> imprimeEstadistica (estadisticaInicioAux usuarios alquileres) 1 parqueos bicicletas usuarios alquileres facturas
+        2 -> imprimeEstadistica2(estadisticaInicio2Aux parqueos alquileres) 1 parqueos bicicletas usuarios alquileres facturas
+        3 -> imprimeEstadistica3(estadisticaInicio3Aux bicicletas facturas) 1 parqueos bicicletas usuarios alquileres facturas
+        4 -> imprimeEstadistica4(estadisticaInicio4Aux facturas 0) parqueos bicicletas usuarios alquileres facturas
+        5 -> menu_operativo(-1,parqueos,bicicletas,usuarios, alquileres,facturas)
+    return()
 --estructura para almacenar parqueos--------------------------------------------------
 type Nombre_parqueo = String
 type Direccion_parqueo = String
@@ -376,7 +395,7 @@ showBicicleta bicicleta nombre=
         ubicacion_bicicleta = getUbicacion_bicicleta(bicicleta)
   
     in
-        if ubicacion_bicicleta == "transito" then
+        if ubicacion_bicicleta == "en transito" then
             if nombre == "transito" then
                 print("codigo de bicicleta: " ++ codigo_bicicleta ++ ", tipo de bicicleta: " ++ tipo_bicicleta ++ ", ubicacion: " ++ ubicacion_bicicleta)
             else 
@@ -499,7 +518,7 @@ getTipo_bici (Alquiler _ _ _ _ _ _ tipo_bici) = tipo_bici;
 
 alquilarBicicletas :: [Parqueo] -> [Bicicleta] -> [Usuario]-> [Alquiler]->[Factura]-> IO()
 alquilarBicicletas listaparqueos listabicicletas listausuarios listaalquileres listafacturas= do
-    putStr("Introduzca su Cedula: ")
+    putStr("Introduzca su Cédula: ")
     cedula_str <- getLine
     let validando = validarCedulaAux listausuarios cedula_str
     
@@ -618,7 +637,7 @@ validarCodigo bicicleta bici=
         tipo_bici = getTipo_bicicleta(bicicleta)
         
     in
-        if cod_bici == bici && ubi_bici/= "transito" then 
+        if cod_bici == bici && ubi_bici/= "en transito" then 
             [ubi_bici,tipo_bici]
         else
             [" "]
@@ -633,7 +652,7 @@ modificarCodigoAux lista bici=
             let 
                 cod_bici = getCodigo_bicicleta(head lista)
                 tip_bici = getTipo_bicicleta(head lista)
-                ubi_bici= "transito"
+                ubi_bici= "en transito"
             in
                 if cod_bici == bici then 
                     [creaBicicleta([cod_bici,tip_bici,ubi_bici])] ++ (tail lista)
@@ -649,31 +668,6 @@ crearAlquiler lista usuario id_bici desti_alqui salid_alqui tipo_bici=
         do
             let id_alquiler=getId_alquiler(last(lista))+1
             [last(lista)] ++  [creaAlquiler([usuario,id_bici,show id_alquiler,"activo",desti_alqui,salid_alqui,tipo_bici])]
-
----- PARA VER QUE TIENE LA ESTRUCTURA ALQUILERES
-showAlquileresAux :: [Alquiler] -> IO ()
-showAlquileresAux [ ] = print("")
-showAlquileresAux lista=
-    
-    do  
-        showTodosAlquiler (head lista)
-        showAlquileresAux (tail lista)
-
---Entradas:Un usuarios y un string
---Salidas:No tiene
---Funcionalidad:se encarga de imprimir la informacion de los usuarios
-showTodosAlquiler :: Alquiler -> IO ()
-showTodosAlquiler usuario =
-    let 
-        usuarios = getUsuario_cedula(usuario)
-        id_cleta = getId_bicicleta(usuario)
-        id_alqui = getId_alquiler(usuario)
-        estado = getEstado_alquiler(usuario)
-        salida= getSalida_alquiler(usuario)
-        llegada= getDestino_alquiler(usuario)
-    in
-
-        print("Cedula: " ++ show usuarios ++ ", Cleta: " ++ id_cleta ++", Alqui: " ++ show id_alqui++ ", Estado: "++ estado ++", Salida: "++ salida++", Destino: "++ llegada )
 
 ---------------------------------------------Factura----------------------------------
 --estructura para almacenar facturas------------------------------------------------
@@ -886,3 +880,231 @@ modificarCleta listabicicletas id_bicicleta ubicacion=
 
                 else
                     [head listabicicletas] ++ modificarCleta (tail listabicicletas) id_bicicleta ubicacion
+
+
+
+-------------------------ESTADÍSTICAS------------------------------
+
+---Estadística # 1
+
+imprimeEstadistica::[[Integer]]->Integer->[Parqueo]->[Bicicleta]->[Usuario]->[Alquiler]->[Factura]->IO()
+imprimeEstadistica estadistica contador parqueos bicicletas usuarios alquileres facturas= 
+    do
+        let top5= ordenaTop estadistica
+        do
+            if contador > 5 then
+                putStr("\n")
+            else
+                do 
+                    putStr("\n")
+                    putStr (show contador++". Usuario: "++ show(head(head top5))++", Cantidad de Viajes: "++ show(last(head top5)))
+                    imprimeEstadistica (tail top5) (contador+1) parqueos bicicletas usuarios alquileres facturas
+        menu_estadisticas(-1,parqueos,bicicletas,usuarios,alquileres,facturas)
+ordenaTop:: [[Integer]]->[[Integer]]
+ordenaTop lista = 
+    do            
+
+        take 5 (sortBy (\[_,a] [_,b] -> compare b a) lista)
+
+
+estadisticaInicioAux :: [Usuario] ->[Alquiler] -> [[Integer]]
+estadisticaInicioAux [ ] listaalquileres = []
+estadisticaInicioAux lista listaalquileres=
+    
+    do 
+        [estadisticaInicio (head lista)  listaalquileres] ++ estadisticaInicioAux (tail lista) listaalquileres
+       
+estadisticaInicio :: Usuario ->[Alquiler] -> [Integer]
+estadisticaInicio usuario listaalquileres=
+    let 
+        cedula = getCedula(usuario)
+        cantidad=0
+    in
+        estadisticaUsuarioAux listaalquileres cedula cantidad
+ 
+
+estadisticaUsuarioAux :: [Alquiler]->Integer->Integer->[Integer]
+estadisticaUsuarioAux [] cedul cantidad= [cedul,cantidad]
+estadisticaUsuarioAux lista cedul cantidad=
+    do
+        let 
+            canti= (estadisticaUsuario (head lista) cedul cantidad)
+        
+        (estadisticaUsuarioAux (tail lista) cedul canti)
+
+estadisticaUsuario :: Alquiler -> Integer->Integer -> Integer
+estadisticaUsuario alquiler cedul cantidad=
+    let 
+        cedula=getUsuario_cedula(alquiler)
+        estado = getEstado_alquiler(alquiler)
+
+    in
+
+        if cedula==cedul then 
+
+            if estado == "activo" || estado =="facturado" then  
+                
+                    
+                cantidad+1
+            else  
+                
+                    
+                cantidad
+        else
+            cantidad
+          
+
+---Estadística #2
+imprimeEstadistica2::[(String,Integer)]->Integer->[Parqueo]->[Bicicleta]->[Usuario]->[Alquiler]->[Factura]->IO()
+imprimeEstadistica2 estadistica contador parqueos bicicletas usuarios alquileres facturas= 
+    do
+        let top5= ordenaTop2 estadistica
+        do
+            if contador > 5 then
+                putStr("\n")
+            else
+                do 
+                    putStr("\n")
+                    putStr (show contador++". Nombre Parqueo: "++ fst(head top5)++", Cantidad de Viajes(salida o destino): "++ show(snd(head top5)))
+                    imprimeEstadistica2 (tail top5) (contador+1) parqueos bicicletas usuarios alquileres facturas
+        menu_estadisticas(-1,parqueos,bicicletas,usuarios,alquileres,facturas)
+
+ordenaTop2:: [(String,Integer)]->[(String,Integer)]
+ordenaTop2 lista = 
+    do            
+
+        take 5 (sortBy (\(_,a) (_,b) -> compare b a) lista)
+
+
+estadisticaInicio2Aux :: [Parqueo] ->[Alquiler] -> [(String,Integer)]
+estadisticaInicio2Aux [ ] listaalquileres = []
+estadisticaInicio2Aux lista listaalquileres=
+    
+    do 
+       [estadisticaInicio2 (head lista)  listaalquileres] ++ estadisticaInicio2Aux (tail lista) listaalquileres
+       
+estadisticaInicio2 :: Parqueo ->[Alquiler] -> (String,Integer)
+estadisticaInicio2 parqueo listaalquileres=
+    let 
+        nombre = getNombre_parqueo(parqueo)
+        cantidad=0
+    in
+        estadisticaParqueoAux listaalquileres nombre cantidad
+ 
+
+estadisticaParqueoAux :: [Alquiler]->String->Integer->(String,Integer)
+estadisticaParqueoAux [] nombre cantidad= (nombre,cantidad)
+estadisticaParqueoAux lista nombre cantidad=
+    do
+        let 
+            canti= (estadisticaParqueo (head lista) nombre cantidad)
+        
+        (estadisticaParqueoAux (tail lista) nombre canti)
+
+estadisticaParqueo :: Alquiler -> String->Integer -> Integer
+estadisticaParqueo alquiler nombre cantidad=
+    let 
+        nom_sali = getSalida_alquiler(alquiler)
+        nom_desti = getDestino_alquiler(alquiler)
+        estado = getEstado_alquiler(alquiler)
+
+    in
+
+        if nombre==nom_sali || nombre == nom_desti then 
+
+            if estado == "activo" || estado =="facturado" then  
+                
+                    
+                cantidad+1
+            else  
+                
+                    
+                cantidad
+        else
+            cantidad
+
+--Estadística # 3
+
+
+imprimeEstadistica3::[(String,Integer)]->Integer->[Parqueo]->[Bicicleta]->[Usuario]->[Alquiler]->[Factura]->IO()
+imprimeEstadistica3 estadistica contador parqueos bicicletas usuarios alquileres facturas= 
+    do
+        let top5= ordenaTop3 estadistica
+        do
+            if contador > 3 then
+                putStr("\n")
+            else
+                do 
+                    putStr("\n")
+                    putStr (show contador++". Código de la Bicicleta: "++ fst(head top5)++", Kilometraje: "++ show(snd(head top5)))
+                    imprimeEstadistica3 (tail top5) (contador+1) parqueos bicicletas usuarios alquileres facturas
+        menu_estadisticas(-1,parqueos,bicicletas,usuarios,alquileres,facturas)
+ordenaTop3:: [(String,Integer)]->[(String,Integer)]
+ordenaTop3 lista = 
+    do            
+
+        take 3 (sortBy (\(_,a) (_,b) -> compare b a) lista)
+
+
+estadisticaInicio3Aux :: [Bicicleta] ->[Factura] -> [(String,Integer)]
+estadisticaInicio3Aux [ ] listafacturas = []
+estadisticaInicio3Aux lista listafacturas=
+    
+    do 
+        [estadisticaInicio3 (head lista)  listafacturas] ++ estadisticaInicio3Aux (tail lista) listafacturas
+       
+estadisticaInicio3 :: Bicicleta ->[Factura] -> (String,Integer)
+estadisticaInicio3 bicicleta listafacturas=
+    let 
+        codigo=getCodigo_bicicleta(bicicleta)
+        cantidad=0
+    in
+        estadisticaBicicletaAux listafacturas codigo cantidad
+ 
+
+estadisticaBicicletaAux :: [Factura]->String->Integer->(String,Integer)
+estadisticaBicicletaAux [] codigo cantidad= (codigo,cantidad)
+estadisticaBicicletaAux lista codigo cantidad=
+    do
+        let 
+            canti= (estadisticaBicicleta (head lista) codigo cantidad)
+        
+        (estadisticaBicicletaAux (tail lista) codigo canti)
+
+estadisticaBicicleta :: Factura -> String->Integer -> Integer
+estadisticaBicicleta factura codigo cantidad=
+    let 
+        cod_bici=getId_bicicleta_factura(factura)
+        distancia=getDistancia_recorrido(factura)
+    in
+
+        if codigo==cod_bici then 
+            distancia
+        else
+            0
+
+--Estadística # 4
+imprimeEstadistica4::[Integer]->[Parqueo]->[Bicicleta]->[Usuario]->[Alquiler]->[Factura]->IO()
+imprimeEstadistica4 estadistica parqueos bicicletas usuarios alquileres facturas= 
+    do
+        putStr("\n")
+        putStr ("Total de viajes: "++ show (last(estadistica))++", Total de Kilómetros: "++ show(sum(init(estadistica))) ++ ", Total Facturado: "++ show(last(estadistica)))
+
+        menu_estadisticas(-1,parqueos,bicicletas,usuarios,alquileres,facturas)
+
+estadisticaInicio4Aux :: [Factura] ->Integer->[Integer]
+estadisticaInicio4Aux lista contador=
+    
+    do 
+        if null(lista) then 
+            [contador]
+        else
+            [estadisticaInicio4 (head lista)] ++ estadisticaInicio4Aux (tail lista) (contador+1)
+       
+estadisticaInicio4 :: Factura -> Integer
+estadisticaInicio4 factura =
+    let 
+        kilometraje=getDistancia_recorrido(factura)
+    in
+        kilometraje
+ 
