@@ -667,7 +667,7 @@ crearAlquiler lista usuario id_bici desti_alqui salid_alqui tipo_bici=
     else
         do
             let id_alquiler=getId_alquiler(last(lista))+1
-            [last(lista)] ++  [creaAlquiler([usuario,id_bici,show id_alquiler,"activo",desti_alqui,salid_alqui,tipo_bici])]
+            init(lista)++[last(lista)] ++  [creaAlquiler([usuario,id_bici,show id_alquiler,"activo",desti_alqui,salid_alqui,tipo_bici])]
 
 ---------------------------------------------Factura----------------------------------
 --estructura para almacenar facturas------------------------------------------------
