@@ -701,7 +701,7 @@ imprimeFacturas listabicicletas listaparqueos listausuarios listaalquileres list
     let tmp = (read temporal :: Integer)
 
     let 
-        listafacturastmp = imprimeFacturasAux listaalquileres listaparqueos listafacturas tmp
+        listafacturastmp = listafacturas ++ imprimeFacturasAux listaalquileres listaparqueos listafacturas tmp
         id_alquiler = getId_alquiler_factura(last listafacturastmp)
         id_factura = getId_factura(last listafacturastmp)
         id_bicicleta = getId_bicicleta_factura(last listafacturastmp)
@@ -722,11 +722,11 @@ imprimeFacturasAux listaalquileres listaparqueos listafacturas identificador=
     in
         if estado_alquiler == "activo" then
             if id_alquiler == identificador then
-                listafacturas ++ [showFactura (head listaalquileres) listaparqueos listafacturas] ++ imprimeFacturasAux (tail listaalquileres) listaparqueos listafacturas identificador
+                [showFactura (head listaalquileres) listaparqueos listafacturas] ++ imprimeFacturasAux (tail listaalquileres) listaparqueos listafacturas identificador
             else
-                listafacturas ++ imprimeFacturasAux (tail listaalquileres) listaparqueos listafacturas identificador
+                imprimeFacturasAux (tail listaalquileres) listaparqueos listafacturas identificador
         else
-            listafacturas ++ imprimeFacturasAux (tail listaalquileres) listaparqueos listafacturas identificador
+            imprimeFacturasAux (tail listaalquileres) listaparqueos listafacturas identificador
 
 showFactura :: Alquiler -> [Parqueo]->[Factura]-> Factura
 showFactura alquiler listaparqueos listafacturas=
