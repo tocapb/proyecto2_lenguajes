@@ -438,14 +438,14 @@ showBicicleta bicicleta nombre=
         ubicacion_bicicleta = getUbicacion_bicicleta(bicicleta)
   
     in
-        if ubicacion_bicicleta == "en transito" then
-            if nombre == "transito" then
-                print("codigo de bicicleta: " ++ codigo_bicicleta ++ ", tipo de bicicleta: " ++ tipo_bicicleta ++ ", ubicacion: " ++ ubicacion_bicicleta)
-            else 
-                return ()
+        if nombre == "#" then 
+            print("codigo de bicicleta: " ++ codigo_bicicleta ++ ", tipo de bicicleta: " ++ tipo_bicicleta ++ ", ubicacion: " ++ ubicacion_bicicleta)
         else
-            if nombre == "#" then
-                print("codigo de bicicleta: " ++ codigo_bicicleta ++ ", tipo de bicicleta: " ++ tipo_bicicleta ++ ", ubicacion: " ++ ubicacion_bicicleta)
+            if ubicacion_bicicleta == "en transito" then
+                if nombre == "transito" then
+                    print("codigo de bicicleta: " ++ codigo_bicicleta ++ ", tipo de bicicleta: " ++ tipo_bicicleta ++ ", ubicacion: " ++ ubicacion_bicicleta)
+                else 
+                    return ()
             else
                 if nombre == ubicacion_bicicleta then
                     print("codigo de bicicleta: " ++ codigo_bicicleta ++ ", tipo de bicicleta: " ++ tipo_bicicleta ++ ", ubicacion: " ++ ubicacion_bicicleta)
