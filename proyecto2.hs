@@ -101,6 +101,10 @@ menu_general(opcion,parqueos,bicicletas,usuarios,alquileres, facturas)= do
         5 -> menu_principal(-1,parqueos,bicicletas,usuarios, alquileres, facturas)
     return()
 
+--Entradas:Una opcion de tipo entero y 5 listas, 1 lista de tipo Parqueo, otra de tipo Bicicleta, 
+--otra de tipo Usuario, otra de tipo alquileres y otra de tipo facturas
+--Salidas:Ninguna
+--Funcionalidad:Submenú para acceder a las estadisticas
 menu_estadisticas(opcion,parqueos,bicicletas,usuarios,alquileres,facturas)= do
     putStr("\nEstadisticas\n")
     putStr("1.Top 5 usuarios con más viajes\n")
@@ -156,7 +160,7 @@ separaElementos lista =
     else
         [creaParqueo(separaPorComas((head lista),""))] ++ separaElementos (tail lista)
 
- --Entradas:Una tupla de listas de char
+--Entradas:Una tupla de listas de char
 --Salidas:Una lista de listas de char
 --Funcionalidad:se encarga de separar por comas el contenido enviado
 separaPorComas :: ([Char],[Char])->[[Char]]
@@ -168,7 +172,7 @@ separaPorComas (cadena, temp) =
         else
             separaPorComas ((tail cadena), temp++[(head cadena)])
 
---Entradas:Una lista de parqueos
+--Entradas:Una lista de parqueos, lista de bicicletas, lista de usuarios, lista de alquileres y lista de facturas
 --Salidas:No tiene
 --Funcionalidad:se encarga pedir la provincia por buscar en los parqueos
 showParqueos :: [Parqueo]->[Bicicleta]->[Usuario]->[Alquiler]->[Factura]-> IO()
@@ -238,6 +242,9 @@ separaElementosUsuario lista =
     else
         [creaUsuario(separaPorComasUsuarios((head lista),""))] ++ separaElementosUsuario (tail lista)
 
+--Entradas:Una lista de parqueos, lista de bicicletas, lista de usuarios, lista de alquileres y lista de facturas
+--Salidas:No tiene
+--Funcionalidad:se encarga pedir el numero de cédula para buscar en los usuarios
 showUsuarios :: [Usuario]->[Parqueo] ->[Bicicleta]-> [Alquiler]->[Factura]-> IO()
 showUsuarios listausuarios listaparqueos listabicicletas listaalquileres listafacturas= do
     putStr("Introduzca el número de cedula: ")
@@ -264,7 +271,7 @@ showUsuariosAux lista cedul listaalquileres=
             showUsuario (head lista) cedul_int listaalquileres
             showUsuariosAux (tail lista) cedul listaalquileres
 
---Entradas:Un usuarios y un string
+--Entradas:Un usuarios, un entero y una lista de alquileres
 --Salidas:No tiene
 --Funcionalidad:se encarga de imprimir la informacion de los usuarios
 showUsuario :: Usuario -> Integer->[Alquiler] -> IO ()
@@ -280,7 +287,7 @@ showUsuario usuario cedul listaalquileres=
         else
             return ()
 
---Entradas:Un usuarios
+--Entradas:Un usuario
 --Salidas:No tiene
 --Funcionalidad:se encarga de imprimir la informacion de todos los usuarios
 showTodosUsuarios :: Usuario -> IO ()
@@ -293,6 +300,9 @@ showTodosUsuarios usuario =
         print("Cedula: " ++ show cedula ++ ", Nombre del Usuario: " ++ nombre_usuario)
 
 
+--Entradas:Una lista de Alquileres y un entero
+--Salidas:No tiene
+--Funcionalidad:se encarga de validar cuando se acaban los alquileres cargados
 showAlquileresUsuarioAux :: [Alquiler]->Integer->IO ()
 showAlquileresUsuarioAux [ ] cedul = print("")
 showAlquileresUsuarioAux lista cedul =
@@ -300,6 +310,9 @@ showAlquileresUsuarioAux lista cedul =
         showAlquileresUsuario (head lista) cedul
         showAlquileresUsuarioAux (tail lista) cedul
 
+--Entradas:Un alquiler y un entero
+--Salidas:No tiene
+--Funcionalidad:se encarga de imprimir la informacion del alquiler
 showAlquileresUsuario :: Alquiler -> Integer -> IO ()
 showAlquileresUsuario alquiler cedul=
     let 
@@ -318,6 +331,9 @@ showAlquileresUsuario alquiler cedul=
         else
             return ()        
 
+--Entradas:Una tupla de listas de char
+--Salidas:Una lista de listas de char
+--Funcionalidad:se encarga de separar por comas el contenido enviado
 separaPorComasUsuarios :: ([Char],[Char])->[[Char]]
 separaPorComasUsuarios (cadena, temp) =
     if cadena == "" then [temp]
@@ -390,7 +406,7 @@ verificaParqueosAux listaparqueos ubicacion =
         else
             verificaParqueosAux (tail listaparqueos) ubicacion
 
---Entradas:Una lista de parqueos y un string
+--Entradas:Una lista de parqueos, lista de bicicletas, lista de usuarios, lista de alquileres y lista de facturas
 --Salidas:Un entero
 --Funcionalidad:verifica que el parqueo exista, en caso de  no existir retorna un 2 para que sea borrada dicha bicicleta
 showBicicletas :: [Bicicleta] ->[Parqueo]->[Usuario]->[Alquiler]->[Factura]-> IO()
@@ -451,6 +467,9 @@ consultaBicicletas listaparqueos listabicicletas listausuarios listaalquileres l
     imprimeParqueo listaparqueos listabicicletas nombre_parqueo
     menu_general(-1,listaparqueos,listabicicletas,listausuarios, listaalquileres, listafacturas)
 
+--Entradas:Una lista de parqueos, una lista de bicicletas, una lista de usuarios
+--Salidas:No posee
+--Funcionalidad:Imprime el parqueo más cercano al x y y indicado pero enfocado en el Alquiler
 consultaBicicletasAlquiler :: [Parqueo] -> [Bicicleta] -> [Usuario] -> IO()
 consultaBicicletasAlquiler listaparqueos listabicicletas listausuarios = do
     putStr("Introduzca su coordenada x: ")
@@ -562,7 +581,9 @@ getDestino_alquiler (Alquiler _ _ _ _ destino_alquiler _ _) = destino_alquiler;
 getSalida_alquiler (Alquiler _ _ _ _ _ salida_alquiler _) = salida_alquiler;
 getTipo_bici (Alquiler _ _ _ _ _ _ tipo_bici) = tipo_bici;
 -------------------------------------------------------------------------------------------------------------------------------------------
-
+--Entradas:Una lista de parqueos, una lista de bicicletas, una lista de usuarios, una lista de alquileres y una lista de facturas
+--Salidas:No posee
+--Funcionalidad: Se encarga de pedir los datos necesarios para usarlos en las funciones para realizar un alquiler
 alquilarBicicletas :: [Parqueo] -> [Bicicleta] -> [Usuario]-> [Alquiler]->[Factura]-> IO()
 alquilarBicicletas listaparqueos listabicicletas listausuarios listaalquileres listafacturas= do
     putStr("Introduzca su Cédula: ")
@@ -607,6 +628,9 @@ alquilarBicicletas listaparqueos listabicicletas listausuarios listaalquileres l
 
     menu_general(-1,listaparqueos,listabicicletas,listausuarios, listaalquileres, listafacturas)
 
+--Entradas:Una lista de usuarios y un string
+--Salidas:Un entero o Nothing
+--Funcionalidad: Se encarga de tomar la cédula introducida y recorre usuario para verificar 
 validarCedulaAux :: [Usuario] -> String -> Maybe Int
 validarCedulaAux lista cedul=
     
@@ -623,6 +647,9 @@ validarCedulaAux lista cedul=
             else
                 Just bandera
 
+--Entradas:Un usuario y un string
+--Salidas:Un entero o Nothing
+--Funcionalidad: Se encarga de tomar la cédula introducida y la verifica con el usuario enviado
 validarCedula :: Usuario -> Integer -> Maybe Int
 validarCedula usuario cedul=
     let 
@@ -634,7 +661,9 @@ validarCedula usuario cedul=
         else
             Nothing
 
-
+--Entradas:Una lista de parqueos y un string
+--Salidas:Un entero o Nothing
+--Funcionalidad: Se encarga de tomar el nombre del parqueo introducido y recorre parqueo para verificar 
 validarParqueoAux :: [Parqueo] -> String -> Maybe Int
 validarParqueoAux lista parqueito=
     
@@ -650,6 +679,9 @@ validarParqueoAux lista parqueito=
             else
                 Just bandera
 
+--Entradas:Un parqueo y un string
+--Salidas:Un entero o Nothing
+--Funcionalidad: Se encarga de tomar el nombre del parqueo introducido y verificar con el parqueo enviado
 validarParqueo :: Parqueo -> String -> Maybe Int
 validarParqueo parqueo parqueito=
     let 
@@ -661,6 +693,9 @@ validarParqueo parqueo parqueito=
         else
             Nothing
 
+--Entradas:Una lista de bicicletas y un string
+--Salidas:Un string
+--Funcionalidad: Se encarga de tomar el código de la bicicleta introducida y recorre bicicleta para verificar 
 validarCodigoAux :: [Bicicleta] -> String -> [String]
 validarCodigoAux lista bici=
     
@@ -676,6 +711,9 @@ validarCodigoAux lista bici=
             else
                 bandera
 
+--Entradas:Una bicicleta y un string
+--Salidas:Un string
+--Funcionalidad: Se encarga de tomar el código de la bicicleta introducida y verificar con la bicicleta enviado
 validarCodigo :: Bicicleta -> String -> [String]
 validarCodigo bicicleta bici=
     let 
@@ -689,6 +727,9 @@ validarCodigo bicicleta bici=
         else
             [" "]
 
+--Entradas:Una bicicleta y un string
+--Salidas:Una lista de bicicletas
+--Funcionalidad: Se encarga de modificar por medio del código de la bicicleta la ubicación de ella para ponerla en trasito
 modificarCodigoAux :: [Bicicleta] -> String -> [Bicicleta]
 modificarCodigoAux lista bici=
     
@@ -707,6 +748,9 @@ modificarCodigoAux lista bici=
                     [head lista] ++ modificarCodigoAux (tail lista) bici
 
 
+--Entradas:Una lista de alquileres y 5 strings
+--Salidas:Una lista de alquileres
+--Funcionalidad: Se encarga de crear un alquiler nuevo y agregarlo a la estructura creada para guardarlo
 crearAlquiler ::[Alquiler] -> String -> String -> String ->String -> String->[Alquiler]
 crearAlquiler lista usuario id_bici desti_alqui salid_alqui tipo_bici= 
     if null(lista) then 
@@ -965,6 +1009,9 @@ modificarCleta listabicicletas id_bicicleta ubicacion=
 
 ---Estadística # 1
 
+--Entradas:Una lista de listas de enteros, un entero, una lista de parqueos, una lista de bicicletas, una lista de alquileres y una lista de facturas
+--Salidas:Ninguna
+--Funcionalidad: Se encarga de imprimir la estadística "a" (usuarios con más viajes)
 imprimeEstadistica::[[Integer]]->Integer->[Parqueo]->[Bicicleta]->[Usuario]->[Alquiler]->[Factura]->IO()
 imprimeEstadistica estadistica contador parqueos bicicletas usuarios alquileres facturas= 
     do
@@ -978,20 +1025,28 @@ imprimeEstadistica estadistica contador parqueos bicicletas usuarios alquileres 
                     putStr (show contador++". Usuario: "++ show(head(head top5))++", Cantidad de Viajes: "++ show(last(head top5)))
                     imprimeEstadistica (tail top5) (contador+1) parqueos bicicletas usuarios alquileres facturas
         menu_estadisticas(-1,parqueos,bicicletas,usuarios,alquileres,facturas)
+--Entradas:Una lista de listas de enteros
+--Salidas:Una lista de listas de enteros
+--Funcionalidad: Se encargar de ordenar la estadistica para imprimirlo luego
 ordenaTop:: [[Integer]]->[[Integer]]
 ordenaTop lista = 
     do            
 
         take 5 (sortBy (\[_,a] [_,b] -> compare b a) lista)
 
-
+--Entradas:Una lista de usuarios y una lista de alquileres
+--Salidas:Una lista de listas de enteros
+--Funcionalidad: Se encargar de recorrer usuarios y alquileres para obtener datos necesarios para la estadística
 estadisticaInicioAux :: [Usuario] ->[Alquiler] -> [[Integer]]
 estadisticaInicioAux [ ] listaalquileres = []
 estadisticaInicioAux lista listaalquileres=
     
     do 
         [estadisticaInicio (head lista)  listaalquileres] ++ estadisticaInicioAux (tail lista) listaalquileres
-       
+
+--Entradas:Un usuario y una lista de alquileres
+--Salidas:Una lista de enteros
+--Funcionalidad: Se encargar de sacar la cédula de un usuario y comprobar que está en la lista de alquiler
 estadisticaInicio :: Usuario ->[Alquiler] -> [Integer]
 estadisticaInicio usuario listaalquileres=
     let 
@@ -1000,7 +1055,9 @@ estadisticaInicio usuario listaalquileres=
     in
         estadisticaUsuarioAux listaalquileres cedula cantidad
  
-
+--Entradas:Una lista de alquileres y 2 enteros
+--Salidas:Una lista de enteros
+--Funcionalidad: Se encargar de que con la cédula que se le pasó, buscarla en la lista de alquileres
 estadisticaUsuarioAux :: [Alquiler]->Integer->Integer->[Integer]
 estadisticaUsuarioAux [] cedul cantidad= [cedul,cantidad]
 estadisticaUsuarioAux lista cedul cantidad=
@@ -1010,6 +1067,9 @@ estadisticaUsuarioAux lista cedul cantidad=
         
         (estadisticaUsuarioAux (tail lista) cedul canti)
 
+--Entradas:Un alquiler y 2 enteros
+--Salidas:Un entero
+--Funcionalidad: Se encargar de que con la cédula que se le pasó, validarlo con la del alquiler
 estadisticaUsuario :: Alquiler -> Integer->Integer -> Integer
 estadisticaUsuario alquiler cedul cantidad=
     let 
@@ -1033,6 +1093,10 @@ estadisticaUsuario alquiler cedul cantidad=
           
 
 ---Estadística #2
+
+--Entradas:Una lista de tuplas de un string y entero, un entero, una lista de parqueos, una lista de bicicletas, una lista de alquileres y una lista de facturas
+--Salidas:Ninguna
+--Funcionalidad: Se encarga de imprimir la estadística "b" (parqueos con más salidas o entradas)
 imprimeEstadistica2::[(String,Integer)]->Integer->[Parqueo]->[Bicicleta]->[Usuario]->[Alquiler]->[Factura]->IO()
 imprimeEstadistica2 estadistica contador parqueos bicicletas usuarios alquileres facturas= 
     do
@@ -1047,20 +1111,28 @@ imprimeEstadistica2 estadistica contador parqueos bicicletas usuarios alquileres
                     imprimeEstadistica2 (tail top5) (contador+1) parqueos bicicletas usuarios alquileres facturas
         menu_estadisticas(-1,parqueos,bicicletas,usuarios,alquileres,facturas)
 
+--Entradas:Una lista de tuplas de un string,entero
+--Salidas:Una lista de tuplas de un string,entero
+--Funcionalidad: Se encargar de ordenar la estadistica para imprimirlo luego
 ordenaTop2:: [(String,Integer)]->[(String,Integer)]
 ordenaTop2 lista = 
     do            
 
         take 5 (sortBy (\(_,a) (_,b) -> compare b a) lista)
 
-
+--Entradas:Una lista de parqueos y una lista de alquileres
+--Salidas:Una lista de tuplas de un string,entero
+--Funcionalidad: Se encargar de recorrer parqueos y alquileres para obtener datos necesarios para la estadística
 estadisticaInicio2Aux :: [Parqueo] ->[Alquiler] -> [(String,Integer)]
 estadisticaInicio2Aux [ ] listaalquileres = []
 estadisticaInicio2Aux lista listaalquileres=
     
     do 
        [estadisticaInicio2 (head lista)  listaalquileres] ++ estadisticaInicio2Aux (tail lista) listaalquileres
-       
+
+--Entradas:Un parqueo y una lista de alquileres
+--Salidas:Un tupla de un string,entero
+--Funcionalidad: Se encargar de sacar el nombre de un parqueo y comprobar que está en la lista de alquiler   
 estadisticaInicio2 :: Parqueo ->[Alquiler] -> (String,Integer)
 estadisticaInicio2 parqueo listaalquileres=
     let 
@@ -1069,7 +1141,9 @@ estadisticaInicio2 parqueo listaalquileres=
     in
         estadisticaParqueoAux listaalquileres nombre cantidad
  
-
+--Entradas:Una lista de alquileres, un string y un entero
+--Salidas:Un tupla de un string,entero
+--Funcionalidad: Se encargar de que el nombre de un parqueo que se le pasó, buscarla en la lista de alquileres
 estadisticaParqueoAux :: [Alquiler]->String->Integer->(String,Integer)
 estadisticaParqueoAux [] nombre cantidad= (nombre,cantidad)
 estadisticaParqueoAux lista nombre cantidad=
@@ -1079,6 +1153,9 @@ estadisticaParqueoAux lista nombre cantidad=
         
         (estadisticaParqueoAux (tail lista) nombre canti)
 
+--Entradas:Un alquiler, un string y un entero
+--Salidas:Un entero
+--Funcionalidad: Se encargar de que el nombre de un parqueo que se le pasó, validarlo con el del alquiler
 estadisticaParqueo :: Alquiler -> String->Integer -> Integer
 estadisticaParqueo alquiler nombre cantidad=
     let 
@@ -1103,7 +1180,9 @@ estadisticaParqueo alquiler nombre cantidad=
 
 --Estadística # 3
 
-
+--Entradas:Una lista de tuplas de un string y entero, un entero, una lista de parqueos, una lista de bicicletas, una lista de alquileres y una lista de facturas
+--Salidas:Ninguna
+--Funcionalidad: Se encarga de imprimir la estadistica "c" (bicicletas con más kilometros recorridos)
 imprimeEstadistica3::[(String,Integer)]->Integer->[Parqueo]->[Bicicleta]->[Usuario]->[Alquiler]->[Factura]->IO()
 imprimeEstadistica3 estadistica contador parqueos bicicletas usuarios alquileres facturas= 
     do
@@ -1117,20 +1196,30 @@ imprimeEstadistica3 estadistica contador parqueos bicicletas usuarios alquileres
                     putStr (show contador++". Código de la Bicicleta: "++ fst(head top5)++", Kilometraje: "++ show(snd(head top5)))
                     imprimeEstadistica3 (tail top5) (contador+1) parqueos bicicletas usuarios alquileres facturas
         menu_estadisticas(-1,parqueos,bicicletas,usuarios,alquileres,facturas)
+
+--Entradas:Una lista de tuplas de un string,entero
+--Salidas:Una lista de tuplas de un string,entero
+--Funcionalidad: Se encargar de ordenar la estadistica para imprimirlo luego
 ordenaTop3:: [(String,Integer)]->[(String,Integer)]
 ordenaTop3 lista = 
     do            
 
-        take 3 (sortBy (\(_,a) (_,b) -> compare b a) lista)
+        take 5 (sortBy (\(_,a) (_,b) -> compare b a) lista)
 
 
+--Entradas:Una lista de bicicletas y una lista de facturas
+--Salidas:Una lista de tuplas de un string,entero
+--Funcionalidad: Se encargar de recorrer bicicletas y facturas para obtener datos necesarios para estadística
 estadisticaInicio3Aux :: [Bicicleta] ->[Factura] -> [(String,Integer)]
 estadisticaInicio3Aux [ ] listafacturas = []
 estadisticaInicio3Aux lista listafacturas=
     
     do 
         [estadisticaInicio3 (head lista)  listafacturas] ++ estadisticaInicio3Aux (tail lista) listafacturas
-       
+ 
+--Entradas:Una bicicleta y una lista de alquileres
+--Salidas:Un tupla de un string,entero
+--Funcionalidad: Se encargar de sacar el código de la bicicleta y comprobar que está en la lista de facturas      
 estadisticaInicio3 :: Bicicleta ->[Factura] -> (String,Integer)
 estadisticaInicio3 bicicleta listafacturas=
     let 
@@ -1140,6 +1229,9 @@ estadisticaInicio3 bicicleta listafacturas=
         estadisticaBicicletaAux listafacturas codigo cantidad
  
 
+--Entradas:Una lista de facturas, un string y un entero
+--Salidas:Un tupla de un string,entero
+--Funcionalidad: Se encargar de que el código de la bicicleta que se le pasó, buscarla en la lista de alquileres
 estadisticaBicicletaAux :: [Factura]->String->Integer->(String,Integer)
 estadisticaBicicletaAux [] codigo cantidad= (codigo,cantidad)
 estadisticaBicicletaAux lista codigo cantidad=
@@ -1149,6 +1241,10 @@ estadisticaBicicletaAux lista codigo cantidad=
         
         (estadisticaBicicletaAux (tail lista) codigo canti)
 
+
+--Entradas:Una factura, un string y un entero
+--Salidas:Un entero
+--Funcionalidad: Se encargar de que el código de la bicicleta que se le pasó, validarlo con el del facturas
 estadisticaBicicleta :: Factura -> String->Integer -> Integer
 estadisticaBicicleta factura codigo cantidad=
     let 
@@ -1157,11 +1253,16 @@ estadisticaBicicleta factura codigo cantidad=
     in
 
         if codigo==cod_bici then 
-            distancia
+            
+            (cantidad+distancia)
         else
-            0
+            cantidad
 
 --Estadística # 4
+
+--Entradas:Una lista de enteros , una lista de parqueos, una lista de bicicletas, una lista de alquileres y una lista de facturas
+--Salidas:Ninguna
+--Funcionalidad: Se encarga de imprimir la estadística "d" (resumen)
 imprimeEstadistica4::[Integer]->[Parqueo]->[Bicicleta]->[Usuario]->[Alquiler]->[Factura]->IO()
 imprimeEstadistica4 estadistica parqueos bicicletas usuarios alquileres facturas= 
     do
@@ -1170,6 +1271,10 @@ imprimeEstadistica4 estadistica parqueos bicicletas usuarios alquileres facturas
 
         menu_estadisticas(-1,parqueos,bicicletas,usuarios,alquileres,facturas)
 
+
+--Entradas:Una lista de facturas y un entero
+--Salidas:Una lista de enteros
+--Funcionalidad: Se encargar de recorrer facturas y extrae los datos necesarios para estadística
 estadisticaInicio4Aux :: [Factura] ->Integer->[Integer]
 estadisticaInicio4Aux lista contador=
     
@@ -1178,11 +1283,14 @@ estadisticaInicio4Aux lista contador=
             [contador]
         else
             [estadisticaInicio4 (head lista)] ++ estadisticaInicio4Aux (tail lista) (contador+1)
-       
+
+
+--Entradas:Un factura
+--Salidas:Un entero
+--Funcionalidad: Se encargar de extaer el kilometraje de cada factura
 estadisticaInicio4 :: Factura -> Integer
 estadisticaInicio4 factura =
     let 
         kilometraje=getDistancia_recorrido(factura)
     in
         kilometraje
- 
