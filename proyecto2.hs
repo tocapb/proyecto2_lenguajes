@@ -1,5 +1,6 @@
 import Data.List
 import System.Exit (exitSuccess)
+
 -- datos de la empresa
 -- guardados como globales
 nombre_empresa = "Los cleteros"
@@ -8,6 +9,7 @@ contacto = 87456987
 tarifa_pedal = 1000
 tarifa_electronico = 2000
 
+--Entradas:Ninguna
 --Salidas:Ninguna
 --Funcionalidad:Menú inicial introduciendo el usuario que permite acceder a las funcionalidades
 inicio:: IO()
@@ -34,6 +36,7 @@ inicio= do
         "admin" -> menu_principal(-1,parqueos,bicicletas,usuarios,alquileres, facturas)
         
     return()
+
 --Entradas:Una opcion de tipo entero y una lista de tipo Parqueo
 --Salidas:Ninguna
 --Funcionalidad:Menú principal para acceder a las opciones operativos o generales
@@ -52,7 +55,8 @@ menu_principal(opcion, parqueos,bicicletas,usuarios, alquileres, facturas)= do
         2 -> menu_general(-1,parqueos,bicicletas,usuarios, alquileres, facturas)
         3 -> exitSuccess
         
---Entradas:Una opcion de tipo entero y una lista de tipo Parqueo
+--Entradas:Una opcion de tipo entero y 5 listas, 1 lista de tipo Parqueo, otra de tipo Bicicleta, 
+--otra de tipo Usuario, otra de tipo alquileres y otra de tipo facturas
 --Salidas:Ninguna
 --Funcionalidad:Menú operativo para acceder a las funciones operativas
 menu_operativo(opcion, parqueos,bicicletas,usuarios,alquileres, facturas)= do
@@ -74,7 +78,8 @@ menu_operativo(opcion, parqueos,bicicletas,usuarios,alquileres, facturas)= do
         5 -> menu_principal(-1,parqueos,bicicletas,usuarios, alquileres, facturas)
     return()
 
---Entradas:Una opcion de tipo entero y una lista de tipo Parqueo
+--Entradas:Una opcion de tipo entero y 5 listas, 1 lista de tipo Parqueo, otra de tipo Bicicleta, 
+--otra de tipo Usuario, otra de tipo alquileres y otra de tipo facturas
 --Salidas:Ninguna
 --Funcionalidad:Menú principal para acceder a las funciones generales   
 menu_general(opcion,parqueos,bicicletas,usuarios,alquileres, facturas)= do
@@ -114,6 +119,7 @@ menu_estadisticas(opcion,parqueos,bicicletas,usuarios,alquileres,facturas)= do
         4 -> imprimeEstadistica4(estadisticaInicio4Aux facturas 0) parqueos bicicletas usuarios alquileres facturas
         5 -> menu_operativo(-1,parqueos,bicicletas,usuarios, alquileres,facturas)
     return()
+
 --estructura para almacenar parqueos--------------------------------------------------
 type Nombre_parqueo = String
 type Direccion_parqueo = String
@@ -273,6 +279,7 @@ showUsuario usuario cedul listaalquileres=
                 showAlquileresUsuarioAux listaalquileres cedul
         else
             return ()
+
 --Entradas:Un usuarios
 --Salidas:No tiene
 --Funcionalidad:se encarga de imprimir la informacion de todos los usuarios
@@ -319,6 +326,7 @@ separaPorComasUsuarios (cadena, temp) =
                 [temp] ++ separaPorComas ((tail cadena), "")
         else
             separaPorComas ((tail cadena), temp++[(head cadena)])
+
 --estructura para almacenar bicicletas------------------------------------------------
 type Codigo_bicicleta = String
 type Tipo_bicicleta  = String
@@ -335,7 +343,7 @@ getUbicacion_bicicleta (Bicicleta _ _ ubicacion_bicicleta ) = ubicacion_biciclet
 -----------------------------------------------------------------------------------------------------------------------------------------
 
 --Entradas:Una ruta de archivo
---Salidas:Una lista de parqueos
+--Salidas:Una lista de bicicletas
 --Funcionalidad:Guarda el contenido del archivo
 leerBicicletas :: FilePath -> IO [Bicicleta]
 leerBicicletas archivo = do
@@ -343,12 +351,19 @@ leerBicicletas archivo = do
     let bicicletas = separaElementosBicicleta (lines contenido)
     return bicicletas
 
+--Entradas:Una lista de listas de Char
+--Salidas:Una lista de bicicletas
+--Funcionalidad:crea la lista de bicicletas, esta envia a crear poco a poco 
+--utilizando el constructor y luego almacena la informacion
 separaElementosBicicleta :: [[Char]]-> [Bicicleta]
 separaElementosBicicleta lista = 
     if null(lista) then []
     else
         [creaBicicleta(separaPorComas((head lista),""))] ++ separaElementosBicicleta (tail lista)
 
+--Entradas:Una lista de bicicletas y una lista de parqueos
+--Salidas:Una lista de bicicletas
+--Funcionalidad:saca la ubicacion de la primera bicicleta y dependiendo de la condición recorta la lista
 verificaParqueos :: [Bicicleta]->[Parqueo]->[Bicicleta]
 verificaParqueos listabicicletas listaparqueos =
     let
@@ -361,6 +376,9 @@ verificaParqueos listabicicletas listaparqueos =
             else
                 verificaParqueos (tail listabicicletas) listaparqueos
 
+--Entradas:Una lista de parqueos y un string
+--Salidas:Un entero
+--Funcionalidad:verifica que el parqueo exista, en caso de  no existir retorna un 2 para que sea borrada dicha bicicleta
 verificaParqueosAux :: [Parqueo]->String->Integer
 verificaParqueosAux [ ] ubicacion = 2
 verificaParqueosAux listaparqueos ubicacion = 
@@ -372,6 +390,9 @@ verificaParqueosAux listaparqueos ubicacion =
         else
             verificaParqueosAux (tail listaparqueos) ubicacion
 
+--Entradas:Una lista de parqueos y un string
+--Salidas:Un entero
+--Funcionalidad:verifica que el parqueo exista, en caso de  no existir retorna un 2 para que sea borrada dicha bicicleta
 showBicicletas :: [Bicicleta] ->[Parqueo]->[Usuario]->[Alquiler]->[Factura]-> IO()
 showBicicletas listabicicletas listaparqueos listausuarios listaalquileres listafacturas= do
     putStr("Introduzca el nombre del parqueo: ")
@@ -379,6 +400,9 @@ showBicicletas listabicicletas listaparqueos listausuarios listaalquileres lista
     showBicicletasAux listabicicletas temporal
     menu_operativo(-1,listaparqueos,listabicicletas,listausuarios, listaalquileres, listafacturas)
 
+--Entradas:Una lista de bicicletas y un string
+--Salidas:No posee
+--Funcionalidad:se encarga de ir enviando las bicicletas a su auxiliar
 showBicicletasAux :: [Bicicleta] -> String -> IO ()
 showBicicletasAux [ ] nombre = print("")
 showBicicletasAux lista nombre=
@@ -387,6 +411,9 @@ showBicicletasAux lista nombre=
             showBicicleta (head lista) nombre
             showBicicletasAux (tail lista) nombre
 
+--Entradas:Una bicicleta y un string
+--Salidas:No posee
+--Funcionalidad:Imprime las bicicletas que corresponden en pantalla
 showBicicleta :: Bicicleta -> String -> IO ()
 showBicicleta bicicleta nombre=
     let 
@@ -409,6 +436,9 @@ showBicicleta bicicleta nombre=
                 else
                     return ()
 
+--Entradas:Una lista de parqueos, una lista de bicicletas, una lista de usuarios, una lista de alquileres y una lista de facturas
+--Salidas:No posee
+--Funcionalidad:Imprime el parqueo más cercano al x y y indicado
 consultaBicicletas :: [Parqueo] -> [Bicicleta] -> [Usuario]->[Alquiler]->[Factura]-> IO()
 consultaBicicletas listaparqueos listabicicletas listausuarios listaalquileres listafacturas= do
     putStr("Introduzca su coordenada x: ")
@@ -432,7 +462,9 @@ consultaBicicletasAlquiler listaparqueos listabicicletas listausuarios = do
     let nombre_parqueo = sacaBajo (consultaBicicletasAux listaparqueos x y)
     imprimeParqueo listaparqueos listabicicletas nombre_parqueo
     
-
+--Entradas:Una lista de parqueos, dos enteros
+--Salidas:una lista de tuplas, las tuplan contienen un string y un entero
+--Funcionalidad: Envia la lista de parqueos por partes a calculaPitagoras
 consultaBicicletasAux :: [Parqueo] -> Integer-> Integer->[(String,Integer)]
 consultaBicicletasAux [ ] x y = []
 consultaBicicletasAux listaparqueos x y =
@@ -441,6 +473,9 @@ consultaBicicletasAux listaparqueos x y =
     in
         [elemento] ++ consultaBicicletasAux (tail listaparqueos) x y
 
+--Entradas:Un parqueo, dos enteros
+--Salidas:Una tupla con un string y un entero
+--Funcionalidad:calcula pitagoras de las coordenadas enviadas y adjunta el resultado junto al nombre del parqueo correspondiente
 calculaPitagoras :: Parqueo -> Integer -> Integer->(String,Integer)
 calculaPitagoras parqueo x_us y_us =
     let 
@@ -451,11 +486,17 @@ calculaPitagoras parqueo x_us y_us =
     in
         (nombre_parqueo,res)
 
+--Entradas:Una lista de tuplas de tipo string y entero
+--Salidas:Un string
+--Funcionalidad:se dedica a enviar la lista por partes a su auxiliar
 sacaBajo :: [(String,Integer)]->String
 sacaBajo lista =
     do  
         sacaBajoAux (head lista) (tail lista)
 
+--Entradas:Una tupla con  un string y un entero y una lista de tuplas del mismo tipo
+--Salidas:Un string
+--Funcionalidad:se encarga de comparar cual de las tuplas tiene el menor entero y saca aquella que tenga el menor
 sacaBajoAux :: (String,Integer)->[(String,Integer)]->String
 sacaBajoAux (a,b) lista =
     let 
@@ -468,6 +509,9 @@ sacaBajoAux (a,b) lista =
             else
                 sacaBajoAux (c,d) (tail lista)
 
+--Entradas:Una lista de parqueos, una lista de bicicletas y un string
+--Salidas:No posee
+--Funcionalidad:se encarga de enviar la lista de parqueos por partes a su auxiliar
 imprimeParqueo :: [Parqueo]->[Bicicleta]->String->IO()
 imprimeParqueo [ ] listabicicletas nombre = print("")
 imprimeParqueo listaparqueos listabicicletas nombre=
@@ -476,6 +520,9 @@ imprimeParqueo listaparqueos listabicicletas nombre=
             imprimeParqueoAux (head listaparqueos) listabicicletas nombre
             imprimeParqueo (tail listaparqueos) listabicicletas nombre
 
+--Entradas:Un parqueo, una lista de  bicicletas y un string
+--Salidas:No posee
+--Funcionalidad:Se encarga de imprimir los parqueos que corresponden
 imprimeParqueoAux :: Parqueo->[Bicicleta]->String->IO()
 imprimeParqueoAux parqueo listabicicletas nombre =
     let 
@@ -694,6 +741,10 @@ getDistancia_recorrido (Factura _ _ _ _ _ _ distancia_recorrido _ ) = distancia_
 getId_factura (Factura _ _ _ _ _ _ _ id_factura ) = id_factura;
 -------------------------------------------------------------------------------------------------------------------------------------------
 
+--Entradas:Una lista de bicicletas, una lista de parqueos, una lista de usuarios, una lista de alquileres y una lista de facturas
+--Salidas: No posee
+--Funcionalidad:se encarga de pedir el identificador del alquiler e ir llamando a las funciones necesarias para
+-- modificar la lista de facturas, modificar la lista de alquileres, modificar la lista de alquileres e imprimir la ultima factura guardada
 imprimeFacturas :: [Bicicleta]->[Parqueo]->[Usuario]->[Alquiler]-> [Factura]->IO()
 imprimeFacturas listabicicletas listaparqueos listausuarios listaalquileres listafacturas= do
     putStr("Introduzca su identificador de alquiler: ")
@@ -713,6 +764,9 @@ imprimeFacturas listabicicletas listaparqueos listausuarios listaalquileres list
 
     menu_general(-1,listaparqueos,listabicicletastmp,listausuarios, listaalquilerestmp,listafacturastmp)
 
+--Entradas: Una lista de parqueos, una lista de alquileres, una lista de facturas y un entero
+--Salidas: Una lista de facturas
+--Funcionalidad:se encarga de ir enviando a showFactura aquello que ocupa ser creado y lo mete en una lista
 imprimeFacturasAux :: [Alquiler] ->[Parqueo]->[Factura]->Integer -> [Factura]
 imprimeFacturasAux [ ] listaparqueos listafacturas identificador = []
 imprimeFacturasAux listaalquileres listaparqueos listafacturas identificador=
@@ -728,6 +782,9 @@ imprimeFacturasAux listaalquileres listaparqueos listafacturas identificador=
         else
             imprimeFacturasAux (tail listaalquileres) listaparqueos listafacturas identificador
 
+--Entradas:Un alquiler, una lista de parqueos y una lista de facturas
+--Salidas: Una factura
+--Funcionalidad: crea la factura con los datos correspondientes, aqui se crea el id autogenerado
 showFactura :: Alquiler -> [Parqueo]->[Factura]-> Factura
 showFactura alquiler listaparqueos listafacturas=
     let 
@@ -747,6 +804,9 @@ showFactura alquiler listaparqueos listafacturas=
         else
             factura2
 
+--Entradas:Una lista de parqueos y dos strings
+--Salidas: Un entero
+--Funcionalidad:se encarga de calcular pitagoras para saber la distancia entre dos parqueos
 calculaKm :: [Parqueo] -> String -> String->Integer
 calculaKm listaparqueos des sal = 
     let
@@ -758,7 +818,10 @@ calculaKm listaparqueos des sal =
         res = (x_1 - x_2)^2 + (y_1 - y_2)^2
     in
         res
-    
+
+--Entradas:Una lista de parqueos y dos strings
+--Salidas: Una lista de parqueos (esta lista posee solo dos parqueos)
+--Funcionalidad:se encarga de sacar los parqueos que corresponden a destino y salida
 creaParParqueos :: [Parqueo]->String->String->[Parqueo]
 creaParParqueos [] des sal = []
 creaParParqueos listaparqueos des sal=
@@ -770,6 +833,9 @@ creaParParqueos listaparqueos des sal=
         else
             creaParParqueos (tail listaparqueos) des sal
 
+--Entradas: Una lista de parqueos, una lista de alquileres, una lista de facturas, una lista de bicicletas y una lista de usuarios
+--Salidas: NO posee
+--Funcionalidad:se encarga de pedir el identificador de la factura
 pideIdfactura :: [Bicicleta]->[Parqueo]->[Usuario]->[Alquiler]-> [Factura]->IO()
 pideIdfactura listabicicletas listaparqueos listausuarios listaalquileres listafacturas= do
     putStr("Introduzca su identificador de factura: ")
@@ -778,6 +844,9 @@ pideIdfactura listabicicletas listaparqueos listausuarios listaalquileres listaf
     verFacturas listafacturas tmp
     menu_general(-1,listaparqueos,listabicicletas,listausuarios, listaalquileres,listafacturas)
 
+--Entradas: Una lista de facturas y un entero
+--Salidas: NO posee
+--Funcionalidad:se encarga de enviar la lista por partes a su auxiliar
 verFacturas :: [Factura] ->Integer -> IO()
 verFacturas []  identificador = print("")
 verFacturas listafacturas identificador =
@@ -785,6 +854,9 @@ verFacturas listafacturas identificador =
             verFacturasAux (head listafacturas) identificador
             verFacturas (tail listafacturas) identificador
 
+--Entradas: Una factura y un entero
+--Salidas: NO posee
+--Funcionalidad:se encarga de imprimir bonito la información de la factura
 verFacturasAux :: Factura ->  Integer -> IO()
 verFacturasAux factura indicador =
     let 
@@ -844,6 +916,9 @@ verFacturasAux factura indicador =
         else
             return()
 
+--Entradas: Una lista de alquileres y un entero
+--Salidas: Una lista de alquileres
+--Funcionalidad:se encarga de modificar el estado del alquiler correspondiente
 modificarAlquiler :: [Alquiler]->Integer->[Alquiler]
 modificarAlquiler listaalquileres id_alquiler=
     do  
@@ -864,6 +939,9 @@ modificarAlquiler listaalquileres id_alquiler=
                 else
                     [head listaalquileres] ++ modificarAlquiler (tail listaalquileres) id_alquiler
 
+--Entradas: Una lista de bicicletas y dos strings
+--Salidas: Una lista de bicicletas
+--Funcionalidad:se encarga de modificar la ubicación de la bicicleta por la nueva ubicación
 modificarCleta :: [Bicicleta]->String->String->[Bicicleta]
 modificarCleta listabicicletas id_bicicleta ubicacion=
     do  
