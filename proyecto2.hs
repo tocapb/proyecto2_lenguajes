@@ -326,7 +326,7 @@ showAlquileresUsuario alquiler cedul=
     in
         if cedula == cedul then 
             do
-                print("Alquiler= " ++ " Cleta: " ++ id_cleta ++", Alqui: " ++ show id_alqui++ ", Estado: "++ estado ++", Salida: "++ salida++", Destino: "++ llegada)
+                print("Alquiler= " ++ " Bicicleta: " ++ id_cleta ++", Alquiler: " ++ show id_alqui++ ", Estado: "++ estado ++", Salida: "++ salida++", Destino: "++ llegada)
 
         else
             return ()        
